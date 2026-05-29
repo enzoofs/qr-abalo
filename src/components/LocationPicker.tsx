@@ -116,7 +116,7 @@ export function LocationPicker({ latitude, longitude, radius, onChange }: Props)
     setGpsError(null)
     setGpsBusy(true)
     try {
-      const pos = await getCurrentPosition()
+      const pos = await getCurrentPosition({ desiredAccuracy: Infinity })
       onChange({ latitude: pos.latitude, longitude: pos.longitude })
       setRecenterZoom(PICKED_ZOOM)
     } catch (err) {

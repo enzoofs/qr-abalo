@@ -5,7 +5,7 @@ export type Coords = {
 }
 
 export type GeoError = {
-  code: 'unsupported' | 'denied' | 'unavailable' | 'timeout' | 'unknown'
+  code: 'unsupported' | 'denied' | 'unavailable' | 'timeout' | 'inaccurate' | 'unknown'
   message: string
 }
 
@@ -14,11 +14,21 @@ const ERROR_MESSAGES: Record<GeoError['code'], string> = {
   denied: 'Você bloqueou o acesso à localização. Libera nas configurações do navegador e tenta de novo.',
   unavailable: 'Não foi possível obter sua localização. Tenta sair e entrar de novo no local.',
   timeout: 'Demorou demais pra pegar sua localização. Tenta de novo.',
+  inaccurate:
+    'Seu celular está enviando uma localização APROXIMADA, por isso a presença não pode ser confirmada com precisão. Ative a "Localização precisa": no Android, Configurações > Localização > Permissões do app > este app/navegador > ative "Usar localização precisa". No iPhone, Ajustes > Privacidade > Serviços de Localização > o app/Safari > ative "Localização precisa". Depois tente de novo.',
   unknown: 'Erro inesperado ao pegar sua localização.',
 }
 
-export function getCurrentPosition(options?: { timeoutMs?: number }): Promise<Coords> {
-  const timeoutMs = options?.timeoutMs ?? 12000
+// Acima dessa precisão (em metros) consideramos que o celular está em
+// "localização aproximada" e recusamos, pois daria check-in errado.
+const MAX_ACCEPTABLE_ACCURACY = 50
+
+export function getCurrentPosition(options?: {
+  timeoutMs?: number
+  desiredAccuracy?: number
+}): Promise<Coords> {
+  const timeoutMs = options?.timeoutMs ?? 15000
+  const desiredAccuracy = options?.desiredAccuracy ?? MAX_ACCEPTABLE_ACCURACY
 
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
@@ -26,15 +36,45 @@ export function getCurrentPosition(options?: { timeoutMs?: number }): Promise<Co
       return
     }
 
-    navigator.geolocation.getCurrentPosition(
+    let best: Coords | null = null
+    let settled = false
+    let watchId: number
+
+    function finish() {
+      if (settled) return
+      settled = true
+      navigator.geolocation.clearWatch(watchId)
+      clearTimeout(timer)
+      if (best && best.accuracy <= desiredAccuracy) {
+        resolve(best)
+      } else if (best) {
+        // Conseguimos uma posição, mas imprecisa demais (localização aproximada).
+        reject({ code: 'inaccurate', message: ERROR_MESSAGES.inaccurate } satisfies GeoError)
+      } else {
+        reject({ code: 'timeout', message: ERROR_MESSAGES.timeout } satisfies GeoError)
+      }
+    }
+
+    const timer = setTimeout(finish, timeoutMs)
+
+    watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        resolve({
+        const c: Coords = {
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
           accuracy: pos.coords.accuracy,
-        })
+        }
+        if (!best || c.accuracy < best.accuracy) best = c
+        // Assim que a precisão estiver boa, encerra na hora.
+        if (c.accuracy <= desiredAccuracy) finish()
       },
       (err) => {
+        if (settled) return
+        // Se já temos alguma leitura, deixa o timeout decidir; senão, falha agora.
+        if (best) return
+        settled = true
+        navigator.geolocation.clearWatch(watchId)
+        clearTimeout(timer)
         const code: GeoError['code'] =
           err.code === err.PERMISSION_DENIED
             ? 'denied'
