@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { getCurrentPosition, type GeoError } from '../../lib/geo'
 import { useAuth } from '../../lib/auth'
+import { LocationPicker } from '../../components/LocationPicker'
 
 function defaultStart(): string {
   const d = new Date()
@@ -30,24 +30,8 @@ export default function NovoEvento() {
   const [longitude, setLongitude] = useState<number | null>(null)
   const [radius, setRadius] = useState(150)
 
-  const [geoBusy, setGeoBusy] = useState(false)
-  const [geoError, setGeoError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-
-  async function handleCaptureLocation() {
-    setGeoError(null)
-    setGeoBusy(true)
-    try {
-      const pos = await getCurrentPosition()
-      setLatitude(pos.latitude)
-      setLongitude(pos.longitude)
-    } catch (err) {
-      setGeoError((err as GeoError).message)
-    } finally {
-      setGeoBusy(false)
-    }
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -136,20 +120,15 @@ export default function NovoEvento() {
           <label className="block text-sm font-medium text-stone-700 mb-1">
             Localização
           </label>
-          <button
-            type="button"
-            onClick={handleCaptureLocation}
-            disabled={geoBusy}
-            className="w-full py-2 rounded-md border border-stone-300 bg-white hover:bg-stone-50 text-sm font-medium disabled:opacity-50"
-          >
-            {geoBusy ? 'Capturando…' : latitude !== null ? 'Atualizar localização' : 'Usar minha localização atual'}
-          </button>
-          {geoError && <p className="text-sm text-red-600 mt-1">{geoError}</p>}
-          {latitude !== null && longitude !== null && (
-            <p className="text-xs text-stone-500 mt-1">
-              {latitude.toFixed(6)}, {longitude.toFixed(6)}
-            </p>
-          )}
+          <LocationPicker
+            latitude={latitude}
+            longitude={longitude}
+            radius={radius}
+            onChange={({ latitude: lat, longitude: lng }) => {
+              setLatitude(lat)
+              setLongitude(lng)
+            }}
+          />
         </div>
 
         <div>
