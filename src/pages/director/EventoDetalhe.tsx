@@ -37,6 +37,7 @@ function formatDateTime(iso: string): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   })
 }
 
@@ -44,6 +45,7 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   })
 }
 
@@ -172,7 +174,14 @@ export default function EventoDetalhe() {
           m.full_name,
           m.email,
           'Presente',
-          new Date(att.checked_in_at).toLocaleString('pt-BR'),
+          new Date(att.checked_in_at).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }),
           att.source === 'self' ? 'App' : 'Manual',
           att.distance_meters ?? '',
         ])
