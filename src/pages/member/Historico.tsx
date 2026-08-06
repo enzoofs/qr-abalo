@@ -37,6 +37,8 @@ function formatTime(iso: string): string {
   })
 }
 
+const MIN_PRESENCAS = 5
+
 const STATUS_META: Record<Row['status'], { label: string; color: string }> = {
   present: { label: 'Presente', color: 'bg-green-100 text-green-700' },
   absent: { label: 'Falta', color: 'bg-red-100 text-red-700' },
@@ -108,13 +110,28 @@ export default function MemberHistorico() {
         <h1 className="text-xl font-bold mt-2">Meu histórico</h1>
       </header>
 
-      <div className="grid grid-cols-3 gap-2 mb-6">
+      <div className="grid grid-cols-3 gap-2 mb-4">
         <Stat label="Presenças" value={stats.presentCount} />
         <Stat label="Ensaios" value={stats.total} />
         <Stat
           label="% presença"
           value={stats.percent === null ? '—' : `${stats.percent}%`}
         />
+      </div>
+
+      <div className="rounded-lg border border-stone-200 bg-white p-4 mb-6">
+        <div className="flex justify-between items-baseline mb-1">
+          <p className="text-sm font-medium text-stone-700">Mínimo de presenças</p>
+          <p className="text-sm text-stone-500">
+            {stats.presentCount}/{MIN_PRESENCAS}
+          </p>
+        </div>
+        <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${stats.presentCount >= MIN_PRESENCAS ? 'bg-green-500' : 'bg-abalo-500'}`}
+            style={{ width: `${Math.min(100, (stats.presentCount / MIN_PRESENCAS) * 100)}%` }}
+          />
+        </div>
       </div>
 
       {loading ? (

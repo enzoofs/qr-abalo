@@ -66,11 +66,13 @@ export default function Relatorio() {
 
   const summary = useMemo(() => {
     const now = new Date()
-    const closed = events.filter((e) => new Date(e.ends_at) < now)
+    // "closed" = ensaios que já começaram, pra contar presença assim que é marcada
+    // (sem esperar o ensaio encerrar — igual ao histórico do membro)
+    const closed = events.filter((e) => new Date(e.starts_at) <= now)
     const attendanceSet = new Set(attendances.map((a) => `${a.member_id}:${a.event_id}`))
 
     const memberStats = members.map((m) => {
-      const present = closed.filter((e) => attendanceSet.has(`${m.id}:${e.id}`)).length
+      const present = attendances.filter((a) => a.member_id === m.id).length
       const total = closed.length
       const percent = total === 0 ? null : Math.round((present / total) * 100)
       return { member: m, present, total, percent }

@@ -12,6 +12,8 @@ type Event = {
 
 type Status = 'live' | 'upcoming' | 'none'
 
+const MIN_PRESENCAS = 5
+
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', {
     day: '2-digit',
@@ -25,10 +27,20 @@ export default function MemberHome() {
   const { member, signOut } = useAuth()
   const [event, setEvent] = useState<Event | null>(null)
   const [status, setStatus] = useState<Status>('none')
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false)
+  const [totalPresencas, setTotalPresencas] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!member) return
     const now = new Date().toISOString()
+
+    supabase
+      .from('attendances')
+      .select('event_id', { count: 'exact', head: true })
+      .eq('member_id', member.id)
+      .then(({ count }) => setTotalPresencas(count ?? 0))
+
     supabase
       .from('events')
       .select('id, name, starts_at, ends_at')
@@ -36,16 +48,24 @@ export default function MemberHome() {
       .order('starts_at', { ascending: true })
       .limit(1)
       .maybeSingle()
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) console.error(error)
         if (data) {
           setEvent(data)
           const start = new Date(data.starts_at)
           setStatus(new Date() >= start ? 'live' : 'upcoming')
+
+          const { data: att } = await supabase
+            .from('attendances')
+            .select('id')
+            .eq('event_id', data.id)
+            .eq('member_id', member.id)
+            .maybeSingle()
+          setAlreadyCheckedIn(!!att)
         }
         setLoading(false)
       })
-  }, [])
+  }, [member])
 
   return (
     <div className="min-h-full p-6 max-w-md mx-auto">
@@ -75,7 +95,11 @@ export default function MemberHome() {
             {formatDateTime(event.starts_at)} → {formatDateTime(event.ends_at)}
           </p>
 
-          {status === 'live' ? (
+          {alreadyCheckedIn ? (
+            <div className="w-full py-3 mt-4 rounded-lg bg-green-50 border border-green-200 text-green-700 font-medium text-center">
+              Você já marcou presença ✓
+            </div>
+          ) : status === 'live' ? (
             <Link
               to="/member/scanner"
               className="block w-full py-3 mt-4 rounded-lg bg-abalo-600 text-white font-medium text-center hover:bg-abalo-700"
@@ -89,6 +113,21 @@ export default function MemberHome() {
           )}
         </div>
       )}
+
+      <div className="rounded-lg border border-stone-200 bg-white p-4 mt-6">
+        <div className="flex justify-between items-baseline mb-1">
+          <p className="text-sm font-medium text-stone-700">Presenças</p>
+          <p className="text-sm text-stone-500">
+            {totalPresencas}/{MIN_PRESENCAS} mínimo
+          </p>
+        </div>
+        <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${totalPresencas >= MIN_PRESENCAS ? 'bg-green-500' : 'bg-abalo-500'}`}
+            style={{ width: `${Math.min(100, (totalPresencas / MIN_PRESENCAS) * 100)}%` }}
+          />
+        </div>
+      </div>
 
       <Link
         to="/member/historico"
