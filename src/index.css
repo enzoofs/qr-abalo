@@ -6,6 +6,10 @@ html, body, #root {
   height: 100%;
 }
 
+html {
+  color-scheme: light;
+}
+
 body {
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   background-color: #fdf3e7;
