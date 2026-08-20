@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { MemberImport } from '../../components/MemberImport'
+import { Button, Input, PageHeader } from '../../components/ui'
 
 type Member = {
   id: string
@@ -56,36 +56,31 @@ export default function Membros() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-6">
-        <Link to="/director" className="text-sm text-stone-500">
-          ← Voltar
-        </Link>
-        <h1 className="text-xl font-bold mt-2">Membros</h1>
-        <p className="text-sm text-stone-500 mt-1">
-          {members.length} cadastrado{members.length === 1 ? '' : 's'}
-        </p>
-      </header>
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
+      <PageHeader
+        backTo="/director"
+        title="Membros"
+        subtitle={`${members.length} cadastrado${members.length === 1 ? '' : 's'}`}
+      />
 
       <div className="flex gap-2 mb-2">
-        <input
+        <Input
           type="search"
           placeholder="Buscar por nome ou e-mail"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm"
         />
-        <button
+        <Button
           onClick={() => {
             setAdding(true)
             setEditing(null)
             setImporting(false)
             setError(null)
           }}
-          className="px-3 py-2 rounded-md bg-abalo-600 text-white text-sm font-medium hover:bg-abalo-700"
+          className="shrink-0"
         >
-          + Novo
-        </button>
+          + NOVO
+        </Button>
       </div>
 
       <button
@@ -95,9 +90,9 @@ export default function Membros() {
           setEditing(null)
           setError(null)
         }}
-        className="text-xs text-abalo-700 mb-4 hover:underline"
+        className="text-xs font-bold text-abalo-blue mb-4"
       >
-        {importing ? 'Cancelar importação' : 'Importar planilha de membros'}
+        {importing ? 'CANCELAR IMPORTAÇÃO' : 'IMPORTAR PLANILHA DE MEMBROS'}
       </button>
 
       {importing && (
@@ -127,12 +122,12 @@ export default function Membros() {
         />
       )}
 
-      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      {error && <p className="text-sm font-semibold text-abalo-red mb-3">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-stone-500">Carregando…</p>
+        <p className="text-sm text-abalo-muted">Carregando…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-stone-500 text-center py-6">
+        <p className="text-sm text-abalo-muted text-center py-6">
           {members.length === 0 ? 'Nenhum membro ainda.' : 'Nenhum resultado.'}
         </p>
       ) : (
@@ -140,13 +135,13 @@ export default function Membros() {
           {filtered.map((m) => (
             <li
               key={m.id}
-              className="flex justify-between items-center gap-2 p-3 rounded-md bg-white border border-stone-200"
+              className="flex justify-between items-center gap-2 p-3 rounded-md bg-white border-2 border-abalo-ink"
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">{m.full_name}</p>
-                <p className="text-xs text-stone-500 truncate">{m.email}</p>
+                <p className="text-sm font-bold text-abalo-ink truncate">{m.full_name}</p>
+                <p className="text-xs text-abalo-muted truncate">{m.email}</p>
                 {m.role === 'director' && (
-                  <span className="inline-block text-[10px] px-1.5 py-0.5 rounded bg-abalo-100 text-abalo-700 mt-1 uppercase tracking-wide">
+                  <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-abalo-amber text-abalo-ink mt-1 uppercase tracking-wide">
                     diretor
                   </span>
                 )}
@@ -158,15 +153,15 @@ export default function Membros() {
                     setAdding(false)
                     setError(null)
                   }}
-                  className="text-xs px-2 py-1 rounded border border-stone-300 hover:bg-stone-50"
+                  className="text-[11px] font-bold px-2 py-1 rounded border-2 border-abalo-ink hover:bg-abalo-paper"
                 >
-                  Editar
+                  EDITAR
                 </button>
                 <button
                   onClick={() => handleDelete(m)}
-                  className="text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                  className="text-[11px] font-bold px-2 py-1 rounded border-2 border-abalo-red text-abalo-red hover:bg-abalo-red/10"
                 >
-                  Remover
+                  REMOVER
                 </button>
               </div>
             </li>
@@ -215,58 +210,47 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-stone-50 border border-stone-200 rounded-lg p-4 mb-4 space-y-3"
+      className="bg-white border-2 border-abalo-ink rounded-md p-4 mb-4 space-y-3"
     >
-      <h2 className="font-semibold text-sm text-stone-700">
-        {initial ? 'Editar membro' : 'Novo membro'}
+      <h2 className="font-display text-[11px] tracking-wide text-abalo-ink">
+        {initial ? 'EDITAR MEMBRO' : 'NOVO MEMBRO'}
       </h2>
-      <input
+      <Input
         type="text"
         placeholder="Nome completo"
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         required
-        className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm"
       />
-      <input
+      <Input
         type="email"
         placeholder="E-mail"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm"
       />
-      <input
+      <Input
         type="tel"
         placeholder="WhatsApp (opcional)"
         value={whatsapp}
         onChange={(e) => setWhatsapp(e.target.value)}
-        className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm"
       />
       <select
         value={role}
         onChange={(e) => setRole(e.target.value as Member['role'])}
-        className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm bg-white"
+        className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
       >
         <option value="member">Membro</option>
         <option value="director">Diretor</option>
       </select>
 
       <div className="grid grid-cols-2 gap-2 pt-1">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="py-2 rounded-md border border-stone-300 bg-white text-sm font-medium"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={busy}
-          className="py-2 rounded-md bg-abalo-600 text-white text-sm font-medium disabled:opacity-50"
-        >
-          {busy ? 'Salvando…' : 'Salvar'}
-        </button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          CANCELAR
+        </Button>
+        <Button type="submit" disabled={busy}>
+          {busy ? 'SALVANDO…' : 'SALVAR'}
+        </Button>
       </div>
     </form>
   )

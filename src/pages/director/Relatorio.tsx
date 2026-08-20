@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { downloadXlsx } from '../../lib/csv'
+import { Button, PageHeader, StatTile } from '../../components/ui'
 
 type Member = {
   id: string
@@ -81,9 +81,7 @@ export default function Relatorio() {
     const avg =
       closed.length === 0 || members.length === 0
         ? null
-        : Math.round(
-            (memberStats.reduce((sum, s) => sum + (s.percent ?? 0), 0) / members.length),
-          )
+        : Math.round(memberStats.reduce((sum, s) => sum + (s.percent ?? 0), 0) / members.length)
 
     const sorted = [...memberStats].sort((a, b) => {
       if (sort === 'name') return a.member.full_name.localeCompare(b.member.full_name, 'pt-BR')
@@ -138,37 +136,29 @@ export default function Relatorio() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-6">
-        <Link to="/director" className="text-sm text-stone-500">
-          ← Voltar
-        </Link>
-        <h1 className="text-xl font-bold mt-2">Relatório consolidado</h1>
-      </header>
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
+      <PageHeader backTo="/director" title="Relatório consolidado" />
 
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <Stat label="Membros" value={members.length} />
-        <Stat label="Ensaios" value={summary.closedCount} />
-        <Stat
-          label="Presença média"
-          value={summary.avg === null ? '—' : `${summary.avg}%`}
-        />
+        <StatTile label="Membros" value={members.length} />
+        <StatTile label="Ensaios" value={summary.closedCount} />
+        <StatTile label="Presença média" value={summary.avg === null ? '—' : `${summary.avg}%`} />
       </div>
 
-      <button
+      <Button
         onClick={handleExportXlsx}
         disabled={loading || members.length === 0}
-        className="w-full py-3 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700 disabled:opacity-50 mb-6"
+        className="w-full py-3 mb-6"
       >
-        Exportar planilha (Excel)
-      </button>
+        EXPORTAR PLANILHA (EXCEL)
+      </Button>
 
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-sm font-semibold text-stone-700">Por membro</h2>
+        <h2 className="font-display text-xs tracking-wide text-abalo-ink">POR MEMBRO</h2>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as typeof sort)}
-          className="text-xs px-2 py-1 rounded border border-stone-300 bg-white"
+          className="text-xs font-bold px-2 py-1.5 rounded-md border-2 border-abalo-ink bg-white"
         >
           <option value="percent_desc">% maior primeiro</option>
           <option value="percent_asc">% menor primeiro</option>
@@ -177,46 +167,34 @@ export default function Relatorio() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-stone-500">Carregando…</p>
+        <p className="text-sm text-abalo-muted">Carregando…</p>
       ) : summary.memberStats.length === 0 ? (
-        <p className="text-sm text-stone-500 text-center py-6">Nenhum membro cadastrado.</p>
+        <p className="text-sm text-abalo-muted text-center py-6">Nenhum membro cadastrado.</p>
       ) : (
         <ul className="space-y-1">
           {summary.memberStats.map((s) => (
             <li
               key={s.member.id}
-              className="flex justify-between items-center gap-2 p-3 rounded-md bg-white border border-stone-200"
+              className="flex justify-between items-center gap-2 p-3 rounded-md bg-white border-2 border-abalo-ink"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-stone-900 truncate">{s.member.full_name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-abalo-500"
-                      style={{ width: `${s.percent ?? 0}%` }}
-                    />
+                <p className="text-sm font-bold text-abalo-ink truncate">{s.member.full_name}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex-1 h-2 bg-abalo-paper rounded-full overflow-hidden border border-abalo-ink/20">
+                    <div className="h-full bg-abalo-coral" style={{ width: `${s.percent ?? 0}%` }} />
                   </div>
-                  <p className="text-xs text-stone-500 whitespace-nowrap">
+                  <p className="text-xs text-abalo-muted whitespace-nowrap">
                     {s.present}/{s.total}
                   </p>
                 </div>
               </div>
-              <p className="text-sm font-semibold text-stone-700 w-12 text-right">
+              <p className="font-display text-sm text-abalo-ink w-12 text-right">
                 {s.percent === null ? '—' : `${s.percent}%`}
               </p>
             </li>
           ))}
         </ul>
       )}
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-white border border-stone-200 rounded-lg px-3 py-2 text-center">
-      <p className="text-xl font-bold text-stone-900">{value}</p>
-      <p className="text-[10px] text-stone-500 uppercase tracking-wide">{label}</p>
     </div>
   )
 }

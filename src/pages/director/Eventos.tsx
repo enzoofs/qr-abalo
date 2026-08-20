@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
+import { Button, Chip, LinkButton, type ChipTone } from '../../components/ui'
 
 type Event = {
   id: string
@@ -21,13 +22,13 @@ function formatDateTime(iso: string): string {
   })
 }
 
-function statusOf(starts_at: string, ends_at: string): { label: string; color: string } {
+function statusOf(starts_at: string, ends_at: string): { label: string; tone: ChipTone } {
   const now = new Date()
   const start = new Date(starts_at)
   const end = new Date(ends_at)
-  if (now < start) return { label: 'futuro', color: 'bg-stone-100 text-stone-600' }
-  if (now > end) return { label: 'encerrado', color: 'bg-stone-50 text-stone-400' }
-  return { label: 'em andamento', color: 'bg-green-100 text-green-700' }
+  if (now < start) return { label: 'futuro', tone: 'muted' }
+  if (now > end) return { label: 'encerrado', tone: 'muted' }
+  return { label: 'em andamento', tone: 'live' }
 }
 
 export default function DirectorEventos() {
@@ -84,57 +85,47 @@ export default function DirectorEventos() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
       <header className="flex justify-between items-start mb-6">
         <div>
-          <p className="text-xs text-stone-500">Painel da Direção</p>
-          <h1 className="text-xl font-bold">{member?.full_name}</h1>
+          <div className="inline-block -rotate-2 bg-abalo-ink px-3 py-1 mb-2">
+            <span className="font-display text-[10px] tracking-wider text-abalo-amber">
+              PAINEL DA DIREÇÃO
+            </span>
+          </div>
+          <h1 className="text-xl font-extrabold">{member?.full_name}</h1>
         </div>
-        <button onClick={signOut} className="text-sm text-stone-500 hover:text-stone-700">
-          Sair
+        <button onClick={signOut} className="text-xs font-bold text-abalo-muted">
+          SAIR
         </button>
       </header>
 
-      <Link
-        to="/director/novo"
-        className="block w-full py-3 rounded-lg bg-abalo-600 text-white font-medium text-center hover:bg-abalo-700 mb-3"
-      >
-        + Novo ensaio
-      </Link>
+      <LinkButton to="/director/novo" variant="primary" className="w-full py-3 mb-3">
+        + NOVO ENSAIO
+      </LinkButton>
 
       <div className="grid grid-cols-2 gap-2 mb-6">
-        <Link
-          to="/director/membros"
-          className="py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 font-medium text-center hover:bg-stone-50 text-sm"
-        >
-          Membros
-        </Link>
-        <Link
-          to="/director/relatorio"
-          className="py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 font-medium text-center hover:bg-stone-50 text-sm"
-        >
-          Relatório
-        </Link>
+        <LinkButton to="/director/membros" variant="secondary" className="py-2.5 text-[11px]">
+          MEMBROS
+        </LinkButton>
+        <LinkButton to="/director/relatorio" variant="secondary" className="py-2.5 text-[11px]">
+          RELATÓRIO
+        </LinkButton>
       </div>
 
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-sm font-semibold text-stone-700">Ensaios</h2>
+        <h2 className="font-display text-xs tracking-wide text-abalo-ink">ENSAIOS</h2>
         {events.length > 0 && (
-          <button
-            onClick={toggleAll}
-            className="text-xs text-stone-500 hover:text-stone-700"
-          >
-            {selected.size === events.length ? 'Limpar' : 'Selecionar todos'}
+          <button onClick={toggleAll} className="text-xs font-bold text-abalo-blue">
+            {selected.size === events.length ? 'LIMPAR' : 'SELECIONAR TODOS'}
           </button>
         )}
       </div>
 
       {loading ? (
-        <p className="text-stone-500 text-sm">Carregando…</p>
+        <p className="text-abalo-muted text-sm">Carregando…</p>
       ) : events.length === 0 ? (
-        <p className="text-stone-500 text-sm">
-          Nenhum ensaio ainda. Cria o primeiro acima.
-        </p>
+        <p className="text-abalo-muted text-sm">Nenhum ensaio ainda. Cria o primeiro acima.</p>
       ) : (
         <ul className="space-y-2 pb-20">
           {events.map((ev) => {
@@ -143,34 +134,30 @@ export default function DirectorEventos() {
             return (
               <li key={ev.id} className="flex items-stretch gap-2">
                 <label
-                  className="flex items-center px-2 cursor-pointer"
+                  className="flex items-center px-1 cursor-pointer"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggle(ev.id)}
-                    className="w-5 h-5 accent-abalo-600"
+                    className="w-5 h-5 accent-abalo-coral"
                   />
                 </label>
                 <Link
                   to={`/director/eventos/${ev.id}`}
-                  className={`flex-1 block p-4 rounded-lg border bg-white hover:bg-stone-50 ${
-                    isSelected ? 'border-abalo-500 ring-1 ring-abalo-500' : 'border-stone-200'
+                  className={`flex-1 block p-4 rounded-md border-2 bg-white ${
+                    isSelected ? 'border-abalo-coral' : 'border-abalo-ink'
                   }`}
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div>
-                      <p className="font-medium text-stone-900">{ev.name}</p>
-                      <p className="text-xs text-stone-500 mt-1">
+                      <p className="font-bold text-abalo-ink">{ev.name}</p>
+                      <p className="text-xs text-abalo-muted mt-1">
                         {formatDateTime(ev.starts_at)} → {formatDateTime(ev.ends_at)}
                       </p>
                     </div>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${status.color}`}
-                    >
-                      {status.label}
-                    </span>
+                    <Chip tone={status.tone}>{status.label}</Chip>
                   </div>
                 </Link>
               </li>
@@ -180,21 +167,14 @@ export default function DirectorEventos() {
       )}
 
       {selected.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-abalo-paper border-t-2 border-abalo-ink">
           <div className="max-w-md mx-auto flex gap-2">
-            <button
-              onClick={() => setSelected(new Set())}
-              className="flex-1 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 font-medium hover:bg-stone-50"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
-            >
-              {deleting ? 'Excluindo…' : `Excluir ${selected.size}`}
-            </button>
+            <Button variant="secondary" onClick={() => setSelected(new Set())} className="flex-1">
+              CANCELAR
+            </Button>
+            <Button variant="danger" onClick={handleDelete} disabled={deleting} className="flex-1">
+              {deleting ? 'EXCLUINDO…' : `EXCLUIR ${selected.size}`}
+            </Button>
           </div>
         </div>
       )}

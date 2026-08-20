@@ -12,7 +12,7 @@ type Event = {
 
 type Status = 'live' | 'upcoming' | 'none'
 
-const MIN_PRESENCAS = 5
+const FLAG_COLORS = ['#e63946', '#ffb703', '#06a77d', '#118ab2', '#7b2cbf']
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', {
@@ -69,77 +69,112 @@ export default function MemberHome() {
   }, [member])
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="flex justify-between items-start mb-8">
-        <div>
-          <p className="text-xs text-stone-500">Abalô-Caxi</p>
-          <h1 className="text-xl font-bold">Olá, {member?.full_name.split(' ')[0]}</h1>
-        </div>
-        <button onClick={signOut} className="text-sm text-stone-500 hover:text-stone-700">
-          Sair
-        </button>
-      </header>
+    <div className="min-h-full bg-abalo-paper relative overflow-hidden">
+      {/* halftone accent corner */}
+      <div className="absolute -top-8 -right-8 w-52 h-52 rounded-full bg-halftone opacity-50 [background-size:14px_14px]" />
 
-      {loading ? (
-        <p className="text-stone-500 text-sm">Carregando…</p>
-      ) : !event ? (
-        <div className="rounded-lg border border-stone-200 bg-white p-6 text-center">
-          <p className="text-stone-500">Nenhum ensaio agendado.</p>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-stone-200 bg-white p-6">
-          <p className="text-xs text-stone-500 mb-1">
-            {status === 'live' ? 'Acontecendo agora' : 'Próximo ensaio'}
-          </p>
-          <h2 className="text-lg font-semibold text-stone-900">{event.name}</h2>
-          <p className="text-sm text-stone-500 mt-1">
-            {formatDateTime(event.starts_at)} → {formatDateTime(event.ends_at)}
-          </p>
-
-          {alreadyCheckedIn ? (
-            <div className="w-full py-3 mt-4 rounded-lg bg-green-50 border border-green-200 text-green-700 font-medium text-center">
-              Você já marcou presença ✓
+      <div className="relative max-w-md mx-auto p-6">
+        <header className="flex justify-between items-start mb-6">
+          <div>
+            <div className="inline-block -rotate-2 bg-abalo-ink px-3 py-1.5">
+              <span className="font-display text-[10px] tracking-wider text-abalo-amber">
+                ABALÔ-CAXI
+              </span>
             </div>
-          ) : status === 'live' ? (
-            <Link
-              to="/member/scanner"
-              className="block w-full py-3 mt-4 rounded-lg bg-abalo-600 text-white font-medium text-center hover:bg-abalo-700"
-            >
-              Marcar presença
-            </Link>
-          ) : (
-            <p className="text-xs text-stone-400 mt-4 text-center">
-              O botão aparece quando o ensaio começar.
+            <h1 className="text-2xl font-extrabold mt-2.5">
+              Oi, {member?.full_name.split(' ')[0]}
+            </h1>
+          </div>
+          <button
+            onClick={signOut}
+            className="w-10 h-10 rounded-full border-[2.5px] border-abalo-ink bg-white flex items-center justify-center"
+            aria-label="Sair"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </header>
+
+        {loading ? (
+          <p className="text-abalo-muted text-sm">Carregando…</p>
+        ) : !event ? (
+          <div className="rounded-lg border-2 border-abalo-ink bg-white p-6 text-center">
+            <p className="text-abalo-muted">Nenhum ensaio agendado.</p>
+          </div>
+        ) : (
+          <div className="bg-abalo-ink rounded-[10px] shadow-hard-teal p-5">
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-abalo-coral animate-pulse" />
+              <span className="font-display text-[11px] tracking-wider text-orange-300">
+                {status === 'live' ? 'ACONTECENDO AGORA' : 'PRÓXIMO ENSAIO'}
+              </span>
+            </div>
+            <h2 className="text-lg font-extrabold text-abalo-paper">{event.name}</h2>
+            <p className="text-[13px] text-stone-400 mt-1 mb-5">
+              {formatDateTime(event.starts_at)} → {formatDateTime(event.ends_at)}
             </p>
-          )}
-        </div>
-      )}
 
-      <div className="rounded-lg border border-stone-200 bg-white p-4 mt-6">
-        <div className="flex justify-between items-baseline mb-1">
-          <p className="text-sm font-medium text-stone-700">Presenças</p>
-          <p className="text-sm text-stone-500">
-            {totalPresencas}/{MIN_PRESENCAS} mínimo
-          </p>
+            {alreadyCheckedIn ? (
+              <div className="w-full py-3.5 rounded-md bg-abalo-green/90 text-center">
+                <span className="font-display text-sm text-abalo-ink">
+                  PRESENÇA CONFIRMADA ✓
+                </span>
+              </div>
+            ) : status === 'live' ? (
+              <Link
+                to="/member/scanner"
+                className="w-full py-3.5 rounded-md bg-abalo-amber shadow-hard-sm flex items-center justify-center gap-2"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z" />
+                </svg>
+                <span className="font-display text-sm text-abalo-ink">MARCAR PRESENÇA</span>
+              </Link>
+            ) : (
+              <p className="text-xs text-stone-400 text-center">
+                O botão aparece quando o ensaio começar.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="bg-white border-2 border-abalo-ink rounded-[10px] p-5 mt-4 flex items-center gap-4">
+          <div className="font-display text-3xl text-abalo-ink leading-none">{totalPresencas}</div>
+          <div className="flex-1">
+            <p className="text-[13.5px] font-extrabold mb-2">Presenças na bateria</p>
+            <div className="flex gap-1.5">
+              {Array.from({ length: totalPresencas }).map((_, i) => (
+                <span
+                  key={i}
+                  className="w-[22px] h-[14px] rounded border-2 border-abalo-ink"
+                  style={{ backgroundColor: FLAG_COLORS[i % FLAG_COLORS.length] }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full ${totalPresencas >= MIN_PRESENCAS ? 'bg-green-500' : 'bg-abalo-500'}`}
-            style={{ width: `${Math.min(100, (totalPresencas / MIN_PRESENCAS) * 100)}%` }}
-          />
-        </div>
+
+        <Link
+          to="/member/historico"
+          className="flex items-center justify-center gap-1.5 mt-6 font-display text-xs tracking-wide text-abalo-blue"
+        >
+          VER MEU HISTÓRICO
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#118ab2" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </Link>
+
+        <p className="text-xs font-medium text-abalo-muted text-center mt-5 px-10 leading-relaxed">
+          Você também pode escanear o QR direto pela câmera do celular.
+        </p>
       </div>
-
-      <Link
-        to="/member/historico"
-        className="block text-center text-sm text-abalo-700 mt-6 hover:underline"
-      >
-        Ver meu histórico
-      </Link>
-
-      <p className="text-xs text-stone-400 text-center mt-6">
-        Você também pode escanear o QR direto pela câmera do celular.
-      </p>
     </div>
   )
 }

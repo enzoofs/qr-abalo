@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { LocationPicker } from '../../components/LocationPicker'
+import { Button, Input, PageHeader } from '../../components/ui'
 
 function defaultStart(): string {
   const d = new Date()
@@ -63,62 +64,51 @@ export default function NovoEvento() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-6">
-        <button
-          onClick={() => navigate('/director')}
-          className="text-sm text-stone-500 mb-2"
-        >
-          ← Voltar
-        </button>
-        <h1 className="text-2xl font-bold">Novo ensaio</h1>
-      </header>
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
+      <PageHeader backTo="/director" title="Novo ensaio" />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">
-            Nome
+          <label className="block font-display text-[11px] tracking-wide text-abalo-ink mb-1.5">
+            NOME
           </label>
-          <input
+          <Input
             type="text"
             placeholder="Ex: Ensaio 4 — Praça da Liberdade"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
-              Início
+            <label className="block font-display text-[11px] tracking-wide text-abalo-ink mb-1.5">
+              INÍCIO
             </label>
-            <input
+            <Input
               type="datetime-local"
               value={startsAt}
               onChange={(e) => setStartsAt(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
-              Fim
+            <label className="block font-display text-[11px] tracking-wide text-abalo-ink mb-1.5">
+              FIM
             </label>
-            <input
+            <Input
               type="datetime-local"
               value={endsAt}
               onChange={(e) => setEndsAt(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">
-            Localização
+          <label className="block font-display text-[11px] tracking-wide text-abalo-ink mb-1.5">
+            LOCALIZAÇÃO
           </label>
           <LocationPicker
             latitude={latitude}
@@ -132,32 +122,27 @@ export default function NovoEvento() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">
-            Raio (metros)
+          <label className="block font-display text-[11px] tracking-wide text-abalo-ink mb-1.5">
+            RAIO (METROS)
           </label>
-          <input
+          <Input
             type="number"
             min={20}
             max={1000}
             value={radius}
             onChange={(e) => setRadius(Number(e.target.value))}
             required
-            className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
           />
-          <p className="text-xs text-stone-500 mt-1">
+          <p className="text-xs text-abalo-muted mt-1">
             Distância máxima do local pra contar presença. 150m cobre uma quadra/praça.
           </p>
         </div>
 
-        {formError && <p className="text-sm text-red-600">{formError}</p>}
+        {formError && <p className="text-sm font-semibold text-abalo-red">{formError}</p>}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full py-3 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700 disabled:opacity-50"
-        >
-          {busy ? 'Salvando…' : 'Criar ensaio'}
-        </button>
+        <Button type="submit" disabled={busy} className="w-full py-3">
+          {busy ? 'SALVANDO…' : 'CRIAR ENSAIO'}
+        </Button>
       </form>
     </div>
   )

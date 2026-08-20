@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getCurrentPosition, type GeoError } from '../lib/geo'
+import { Button, LinkButton } from '../components/ui'
 
 type CheckinResponse = {
   ok: boolean
@@ -42,6 +43,34 @@ const ERROR_LABELS: Record<string, { title: string; sub?: string }> = {
     title: 'Você já marcou presença',
     sub: 'Nesse ensaio sua presença já está registrada.',
   },
+}
+
+function PinIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 12.5l2.5 2.5L16 9" />
+    </svg>
+  )
+}
+
+function WarnIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l10 18H2L12 2z" />
+      <line x1="12" y1="9" x2="12" y2="14" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  )
 }
 
 export default function Checkin() {
@@ -102,61 +131,60 @@ export default function Checkin() {
   }
 
   return (
-    <div className="min-h-full p-6 flex flex-col justify-center max-w-md mx-auto">
+    <div className="min-h-full p-6 flex flex-col justify-center max-w-md mx-auto bg-abalo-paper">
       {status.kind === 'locating' && (
         <div className="text-center">
-          <div className="animate-pulse text-4xl mb-3">📍</div>
-          <p className="font-medium">Obtendo sua localização…</p>
-          <p className="text-sm text-stone-500 mt-1">Aguarde uns segundos.</p>
+          <div className="animate-pulse mb-4 flex justify-center">
+            <PinIcon />
+          </div>
+          <p className="font-bold">Obtendo sua localização…</p>
+          <p className="text-sm text-abalo-muted mt-1">Aguarde uns segundos.</p>
         </div>
       )}
 
       {status.kind === 'submitting' && (
         <div className="text-center">
-          <div className="animate-pulse text-4xl mb-3">⏳</div>
-          <p className="font-medium">Registrando presença…</p>
+          <div className="animate-pulse mb-4 flex justify-center">
+            <div className="w-10 h-10 rounded-full border-4 border-abalo-ink border-t-transparent animate-spin" />
+          </div>
+          <p className="font-bold">Registrando presença…</p>
         </div>
       )}
 
       {status.kind === 'success' && (
         <div className="text-center">
-          <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold mb-2">Presença registrada!</h1>
-          {status.result.event_name && (
-            <p className="text-stone-600">{status.result.event_name}</p>
-          )}
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-abalo-green border-2 border-abalo-ink flex items-center justify-center shadow-hard-sm">
+              <CheckIcon />
+            </div>
+          </div>
+          <h1 className="text-2xl font-extrabold mb-2">Presença registrada!</h1>
+          {status.result.event_name && <p className="text-abalo-ink">{status.result.event_name}</p>}
           {status.result.distance_meters !== undefined && (
-            <p className="text-xs text-stone-400 mt-1">
-              {status.result.distance_meters}m do local
-            </p>
+            <p className="text-xs text-abalo-muted mt-1">{status.result.distance_meters}m do local</p>
           )}
-          <Link
-            to="/"
-            className="block w-full py-3 mt-8 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700"
-          >
-            Voltar
-          </Link>
+          <LinkButton to="/" className="w-full mt-8 py-3">
+            VOLTAR
+          </LinkButton>
         </div>
       )}
 
       {status.kind === 'error' && (
         <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold mb-2">{status.message}</h1>
-          {status.subline && <p className="text-stone-600">{status.subline}</p>}
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-abalo-amber border-2 border-abalo-ink flex items-center justify-center shadow-hard-sm">
+              <WarnIcon />
+            </div>
+          </div>
+          <h1 className="text-2xl font-extrabold mb-2">{status.message}</h1>
+          {status.subline && <p className="text-abalo-ink">{status.subline}</p>}
           <div className="grid grid-cols-2 gap-2 mt-8">
-            <Link
-              to="/"
-              className="py-3 rounded-lg border border-stone-300 bg-white font-medium hover:bg-stone-50 text-center"
-            >
-              Voltar
-            </Link>
-            <button
-              onClick={retry}
-              className="py-3 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700"
-            >
-              Tentar de novo
-            </button>
+            <LinkButton to="/" variant="secondary" className="py-3">
+              VOLTAR
+            </LinkButton>
+            <Button onClick={retry} className="py-3">
+              TENTAR DE NOVO
+            </Button>
           </div>
         </div>
       )}

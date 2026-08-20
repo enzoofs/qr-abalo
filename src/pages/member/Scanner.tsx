@@ -18,6 +18,8 @@ function extractToken(decoded: string): string | null {
 
 type Phase = 'idle' | 'starting' | 'scanning' | 'error'
 
+const FLAG_COLORS = ['bg-abalo-red', 'bg-abalo-amber', 'bg-abalo-green', 'bg-abalo-blue', 'bg-abalo-purple']
+
 export default function Scanner() {
   const navigate = useNavigate()
   const [phase, setPhase] = useState<Phase>('idle')
@@ -83,54 +85,79 @@ export default function Scanner() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-4">
-        <button onClick={() => navigate('/')} className="text-sm text-stone-500">
-          ← Voltar
-        </button>
-        <h1 className="text-xl font-bold mt-2">Escanear QR do ensaio</h1>
-        <p className="text-sm text-stone-500 mt-1">
-          Aponta a câmera pro QR Code disponibilizado pela direção.
-        </p>
-      </header>
-
-      <div
-        id={READER_ID}
-        className="w-full aspect-square bg-stone-900 rounded-lg overflow-hidden"
-      />
-
-      {phase === 'idle' && (
+    <div className="min-h-full bg-[#2b2b2b] text-abalo-paper flex flex-col">
+      <div className="flex items-center justify-between px-5 pt-6">
         <button
-          onClick={startCamera}
-          className="block w-full py-3 mt-4 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700"
+          onClick={() => navigate('/')}
+          className="w-[38px] h-[38px] rounded-lg bg-abalo-paper border-[2.5px] border-abalo-ink flex items-center justify-center"
+          aria-label="Voltar"
         >
-          Abrir câmera
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
         </button>
-      )}
-
-      {phase === 'starting' && (
-        <p className="text-sm text-stone-500 mt-4 text-center">Abrindo câmera…</p>
-      )}
-
-      {phase === 'scanning' && (
-        <p className="text-xs text-stone-400 mt-3 text-center">
-          Mantenha o QR enquadrado no centro.
-        </p>
-      )}
-
-      {error && (
-        <div className="mt-4">
-          <p className="text-sm text-red-600 text-center">{error}</p>
-          {phase === 'error' && (
-            <button
-              onClick={startCamera}
-              className="block w-full py-3 mt-2 rounded-lg bg-abalo-600 text-white font-medium"
-            >
-              Tentar de novo
-            </button>
-          )}
+        <div className="-rotate-2 bg-abalo-ink px-4 py-1.5">
+          <span className="font-display text-xs tracking-wider text-abalo-amber">ESCANEAR QR</span>
         </div>
-      )}
+        <div className="w-[38px]" />
+      </div>
+
+      <div className="relative w-[260px] h-[260px] mx-auto mt-10">
+        {/* corner brackets */}
+        <svg width="260" height="260" className="absolute inset-0 pointer-events-none z-10">
+          <path d="M4 50 V18 a14 14 0 0 1 14 -14 H50" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
+          <path d="M210 4 H242 a14 14 0 0 1 14 14 V50" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
+          <path d="M256 210 V242 a14 14 0 0 1 -14 14 H210" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
+          <path d="M50 256 H18 a14 14 0 0 1 -14 -14 V210" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
+        </svg>
+
+        <div id={READER_ID} className="w-full h-full rounded-md overflow-hidden bg-black" />
+
+        {phase !== 'scanning' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-md">
+            {phase === 'starting' ? (
+              <p className="text-sm font-semibold">Abrindo câmera…</p>
+            ) : (
+              <button
+                onClick={startCamera}
+                className="px-5 py-3 rounded-md border-[2.5px] border-abalo-ink bg-abalo-amber font-display text-xs tracking-wide text-abalo-ink shadow-hard-sm"
+              >
+                ABRIR CÂMERA
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-6 px-12 text-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9c0b3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <p className="text-[13.5px] font-semibold text-stone-300">
+          {phase === 'scanning'
+            ? 'Aponte para o QR no ponto de encontro do ensaio'
+            : 'Aponta a câmera pro QR Code disponibilizado pela direção.'}
+        </p>
+      </div>
+
+      {error && <p className="text-sm font-semibold text-abalo-coral text-center mt-4 px-8">{error}</p>}
+
+      <div className="mt-auto px-6 pb-9 pt-8 flex flex-col items-center gap-4 bg-gradient-to-t from-abalo-ink to-transparent">
+        <div className="flex gap-1.5">
+          {FLAG_COLORS.map((c) => (
+            <span key={c} className={`w-[26px] h-[9px] rounded-sm ${c}`} />
+          ))}
+        </div>
+        <button
+          onClick={() => navigate('/')}
+          className="w-full max-w-sm py-3.5 rounded-md border-[2.5px] border-abalo-ink bg-abalo-paper text-abalo-ink font-display text-[13px] tracking-wide"
+        >
+          CANCELAR
+        </button>
+      </div>
     </div>
   )
 }

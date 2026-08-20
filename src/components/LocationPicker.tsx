@@ -142,19 +142,19 @@ export function LocationPicker({ latitude, longitude, radius, onChange }: Props)
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
-          className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
+          className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
         />
         {searching && (
-          <span className="absolute right-3 top-2.5 text-xs text-stone-400">buscando…</span>
+          <span className="absolute right-3 top-3 text-xs text-abalo-muted">buscando…</span>
         )}
         {showResults && results.length > 0 && (
-          <ul className="absolute z-[1000] mt-1 w-full bg-white border border-stone-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <ul className="absolute z-[1000] mt-1 w-full bg-white border-2 border-abalo-ink rounded-md shadow-hard-sm max-h-60 overflow-y-auto">
             {results.map((r, i) => (
               <li key={i}>
                 <button
                   type="button"
                   onClick={() => pickFromSearch(r)}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-abalo-paper border-b border-abalo-ink/10 last:border-b-0"
                 >
                   {r.display_name}
                 </button>
@@ -163,13 +163,13 @@ export function LocationPicker({ latitude, longitude, radius, onChange }: Props)
           </ul>
         )}
         {showResults && results.length === 0 && !searching && query.trim().length >= 3 && (
-          <div className="absolute z-[1000] mt-1 w-full bg-white border border-stone-200 rounded-md shadow-lg px-3 py-2 text-sm text-stone-500">
+          <div className="absolute z-[1000] mt-1 w-full bg-white border-2 border-abalo-ink rounded-md shadow-hard-sm px-3 py-2 text-sm text-abalo-muted">
             Nenhum resultado.
           </div>
         )}
       </div>
 
-      <div className="h-[300px] rounded-md overflow-hidden border border-stone-300">
+      <div className="h-[300px] rounded-md overflow-hidden border-2 border-abalo-ink">
         <MapContainer
           center={initialCenter}
           zoom={hasPin ? PICKED_ZOOM : INITIAL_ZOOM}
@@ -191,7 +191,7 @@ export function LocationPicker({ latitude, longitude, radius, onChange }: Props)
               <Circle
                 center={[latitude, longitude]}
                 radius={radius}
-                pathOptions={{ color: '#ea580c', fillColor: '#ea580c', fillOpacity: 0.15 }}
+                pathOptions={{ color: '#ff5a3c', fillColor: '#ff5a3c', fillOpacity: 0.15 }}
               />
               <Recenter lat={latitude} lng={longitude} zoom={recenterZoom} />
             </>
@@ -204,18 +204,22 @@ export function LocationPicker({ latitude, longitude, radius, onChange }: Props)
           type="button"
           onClick={pickFromGPS}
           disabled={gpsBusy}
-          className="w-full py-2 rounded-md border border-stone-300 bg-white hover:bg-stone-50 text-sm font-medium disabled:opacity-50"
+          className="w-full py-2.5 rounded-md border-2 border-abalo-ink bg-white hover:bg-abalo-paper text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          {gpsBusy ? 'Capturando…' : '📍 Usar minha localização atual'}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+          {gpsBusy ? 'Capturando…' : 'Usar minha localização atual'}
         </button>
-        {gpsError && <p className="text-xs text-red-600">{gpsError}</p>}
+        {gpsError && <p className="text-xs font-semibold text-abalo-red">{gpsError}</p>}
         {hasPin && (
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-abalo-muted">
             Pin em {latitude.toFixed(6)}, {longitude.toFixed(6)} · clique no mapa ou arraste o pin para ajustar
           </p>
         )}
         {!hasPin && (
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-abalo-muted">
             Busque um endereço, clique no mapa ou use sua localização atual.
           </p>
         )}

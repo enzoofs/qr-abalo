@@ -8,6 +8,8 @@ function safeNext(raw: string | null): string {
   return raw
 }
 
+const FLAG_COLORS = ['bg-abalo-red', 'bg-abalo-amber', 'bg-abalo-green', 'bg-abalo-blue', 'bg-abalo-purple']
+
 export default function Login() {
   const { session, signInWithEmail, signUpWithEmail } = useAuth()
   const [searchParams] = useSearchParams()
@@ -32,69 +34,112 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-full flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-abalo-700">Abalô-Caxi</h1>
-          <p className="text-sm text-stone-500 mt-1">Controle de presença da bateria</p>
+    <div className="min-h-full relative overflow-hidden bg-abalo-coral">
+      {/* halftone texture */}
+      <div className="absolute inset-0 bg-halftone opacity-40 [background-size:16px_16px]" />
+
+      {/* flat color blocks */}
+      <div className="absolute -top-8 -left-8 w-56 h-56 rounded-br-[220px] bg-abalo-teal" />
+      <div className="absolute -bottom-8 -right-8 w-52 h-64 rounded-tl-[200px] bg-abalo-amber" />
+
+      <div className="relative flex flex-col items-center px-6 pt-16 pb-10">
+        <div className="-rotate-3 bg-abalo-ink px-5 py-2 shadow-hard-sm">
+          <span className="font-display text-xs tracking-wider text-abalo-amber">BLOCO DE RUA · BH</span>
         </div>
 
-        <div className="flex gap-2 mb-4">
-          <button
-            type="button"
-            onClick={() => { setMode('signin'); setError(null) }}
-            className={`flex-1 py-2 rounded-md text-sm font-medium ${
-              mode === 'signin' ? 'bg-abalo-600 text-white' : 'bg-stone-100 text-stone-600'
-            }`}
-          >
-            Entrar
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode('signup'); setError(null) }}
-            className={`flex-1 py-2 rounded-md text-sm font-medium ${
-              mode === 'signup' ? 'bg-abalo-600 text-white' : 'bg-stone-100 text-stone-600'
-            }`}
-          >
-            Criar conta
-          </button>
+        <h1 className="font-display text-5xl leading-[0.95] text-abalo-ink mt-6 text-center">
+          ABALÔ
+          <br />
+          CAXI
+        </h1>
+
+        <div className="flex mt-5 rounded-md overflow-hidden shadow-hard-sm">
+          {FLAG_COLORS.map((c) => (
+            <span key={c} className={`w-7 h-3.5 ${c}`} />
+          ))}
         </div>
 
-        {mode === 'signup' && (
-          <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
-            <strong>Atenção:</strong> use o mesmo e-mail que você informou no formulário de inscrição da bateria. Esse vai ser seu e-mail de login pra sempre.
-          </p>
-        )}
+        <div className="w-full max-w-sm mt-9 bg-abalo-paper border-[3px] border-abalo-ink rounded-lg shadow-hard-lg p-6">
+          <div className="flex gap-2 mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin')
+                setError(null)
+              }}
+              className={`flex-1 py-2 rounded-md border-2 border-abalo-ink font-display text-[11px] tracking-wider ${
+                mode === 'signin' ? 'bg-abalo-ink text-abalo-amber' : 'bg-white text-abalo-ink'
+              }`}
+            >
+              ENTRAR
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup')
+                setError(null)
+              }}
+              className={`flex-1 py-2 rounded-md border-2 border-abalo-ink font-display text-[11px] tracking-wider ${
+                mode === 'signup' ? 'bg-abalo-ink text-abalo-amber' : 'bg-white text-abalo-ink'
+              }`}
+            >
+              CRIAR CONTA
+            </button>
+          </div>
 
-        <form onSubmit={handleEmail} className="space-y-3">
-          <input
-            type="email"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
-          />
-          <input
-            type="password"
-            placeholder="Senha (mín. 6 caracteres)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-            className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500"
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full py-3 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700 disabled:opacity-50"
-          >
-            {busy ? '...' : mode === 'signin' ? 'Entrar' : 'Criar conta'}
-          </button>
-        </form>
+          {mode === 'signup' && (
+            <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
+              <strong>Atenção:</strong> use o mesmo e-mail que você informou no formulário de
+              inscrição da bateria. Esse vai ser seu e-mail de login pra sempre.
+            </p>
+          )}
+
+          <form onSubmit={handleEmail} className="space-y-4">
+            <div>
+              <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                E-MAIL
+              </label>
+              <input
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+              />
+            </div>
+            <div>
+              <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                SENHA
+              </label>
+              <input
+                type="password"
+                placeholder="mín. 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+              />
+            </div>
+            {error && <p className="text-sm font-semibold text-abalo-red">{error}</p>}
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full py-3.5 rounded-md border-[2.5px] border-abalo-ink bg-abalo-coral text-abalo-paper font-display text-sm tracking-wide shadow-hard disabled:opacity-50"
+            >
+              {busy ? '...' : mode === 'signin' ? 'ENTRAR' : 'CRIAR CONTA'}
+            </button>
+          </form>
+        </div>
+
+        <p className="relative text-center text-[13px] font-semibold text-abalo-ink mt-5 px-10 leading-relaxed">
+          Acesso liberado pela diretoria do bloco.
+          <br />
+          Fale com a diretoria se ainda não tem conta.
+        </p>
       </div>
     </div>
   )

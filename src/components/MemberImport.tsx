@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { supabase } from '../lib/supabase'
+import { Button } from './ui'
 
 type ParsedRow = {
   full_name: string
@@ -159,28 +160,27 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
   }
 
   return (
-    <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 mb-4">
+    <div className="bg-white border-2 border-abalo-ink rounded-md p-4 mb-4">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-sm text-stone-700">Importar planilha</h2>
-        <button
-          onClick={onCancel}
-          className="text-xs text-stone-500 hover:text-stone-700"
-        >
-          Fechar
+        <h2 className="font-display text-[11px] tracking-wide text-abalo-ink">IMPORTAR PLANILHA</h2>
+        <button onClick={onCancel} className="text-xs font-bold text-abalo-muted">
+          FECHAR
         </button>
       </div>
 
-      <p className="text-xs text-stone-500 mb-3">
-        Cola ou faz upload de um CSV. Cada linha: <code className="bg-white px-1 rounded border">nome,email,whatsapp</code> (whatsapp opcional). Cabeçalho é detectado automaticamente.
+      <p className="text-xs text-abalo-muted mb-3">
+        Cola ou faz upload de um CSV. Cada linha:{' '}
+        <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">nome,email,whatsapp</code>{' '}
+        (whatsapp opcional). Cabeçalho é detectado automaticamente.
       </p>
 
       <div className="flex gap-2 mb-3">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="text-xs px-3 py-1.5 rounded-md border border-stone-300 bg-white font-medium hover:bg-stone-100"
+          className="text-xs font-bold px-3 py-1.5 rounded-md border-2 border-abalo-ink bg-white hover:bg-abalo-paper"
         >
-          Carregar arquivo CSV
+          CARREGAR ARQUIVO CSV
         </button>
         <input
           ref={fileInputRef}
@@ -199,17 +199,18 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
         }}
         rows={6}
         placeholder={'Maria Silva,maria@gmail.com,11999990001\nJoão Santos,joao@gmail.com'}
-        className="w-full px-3 py-2 rounded-md border border-stone-300 focus:outline-none focus:ring-2 focus:ring-abalo-500 text-sm font-mono"
+        className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white focus:outline-none focus:ring-2 focus:ring-abalo-coral text-sm font-mono"
       />
 
       {parsed.length > 0 && (
         <div className="mt-3 text-xs">
-          <p className="text-stone-600">
-            <strong>{dedupedValid.length}</strong> linha{dedupedValid.length === 1 ? '' : 's'} válida{dedupedValid.length === 1 ? '' : 's'}
+          <p className="text-abalo-ink">
+            <strong>{dedupedValid.length}</strong> linha{dedupedValid.length === 1 ? '' : 's'} válida
+            {dedupedValid.length === 1 ? '' : 's'}
             {invalid.length > 0 && (
               <>
                 {' · '}
-                <span className="text-red-600">
+                <span className="text-abalo-red font-bold">
                   <strong>{invalid.length}</strong> com erro
                 </span>
               </>
@@ -217,8 +218,9 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
             {valid.length !== dedupedValid.length && (
               <>
                 {' · '}
-                <span className="text-stone-500">
-                  {valid.length - dedupedValid.length} duplicado{valid.length - dedupedValid.length === 1 ? '' : 's'} na lista
+                <span className="text-abalo-muted">
+                  {valid.length - dedupedValid.length} duplicado
+                  {valid.length - dedupedValid.length === 1 ? '' : 's'} na lista
                 </span>
               </>
             )}
@@ -226,44 +228,46 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
           {invalid.length > 0 && (
             <ul className="mt-2 space-y-0.5">
               {invalid.slice(0, 5).map((r, i) => (
-                <li key={i} className="text-red-600">
+                <li key={i} className="text-abalo-red">
                   Linha: <span className="font-mono">{r.full_name || '(vazio)'}, {r.email || '(vazio)'}</span> — {r.error}
                 </li>
               ))}
               {invalid.length > 5 && (
-                <li className="text-stone-500">… e mais {invalid.length - 5}</li>
+                <li className="text-abalo-muted">… e mais {invalid.length - 5}</li>
               )}
             </ul>
           )}
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+      {error && <p className="text-sm font-semibold text-abalo-red mt-3">{error}</p>}
 
       {result && (
-        <div className="mt-3 text-sm bg-green-50 border border-green-200 text-green-800 rounded-md p-3">
+        <div className="mt-3 text-sm bg-abalo-green/20 border-2 border-abalo-ink text-abalo-ink rounded-md p-3">
           <p>
-            <strong>{result.inserted}</strong> membro{result.inserted === 1 ? '' : 's'} importado{result.inserted === 1 ? '' : 's'}.
+            <strong>{result.inserted}</strong> membro{result.inserted === 1 ? '' : 's'} importado
+            {result.inserted === 1 ? '' : 's'}.
           </p>
           {result.skipped > 0 && (
             <p className="text-xs mt-1">
-              {result.skipped} ignorado{result.skipped === 1 ? '' : 's'} (já existia{result.skipped === 1 ? '' : 'm'} na base).
+              {result.skipped} ignorado{result.skipped === 1 ? '' : 's'} (já existia
+              {result.skipped === 1 ? '' : 'm'} na base).
             </p>
           )}
         </div>
       )}
 
-      <button
+      <Button
         onClick={handleImport}
         disabled={importing || dedupedValid.length === 0}
-        className="w-full py-2.5 mt-3 rounded-lg bg-abalo-600 text-white font-medium hover:bg-abalo-700 disabled:opacity-50 text-sm"
+        className="w-full mt-3"
       >
         {importing
-          ? 'Importando…'
+          ? 'IMPORTANDO…'
           : dedupedValid.length === 0
-            ? 'Importar'
-            : `Importar ${dedupedValid.length} membro${dedupedValid.length === 1 ? '' : 's'}`}
-      </button>
+            ? 'IMPORTAR'
+            : `IMPORTAR ${dedupedValid.length} MEMBRO${dedupedValid.length === 1 ? '' : 'S'}`}
+      </Button>
     </div>
   )
 }

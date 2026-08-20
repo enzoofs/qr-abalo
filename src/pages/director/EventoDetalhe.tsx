@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { QRDisplay } from '../../components/QRDisplay'
 import { downloadXlsx, slugify } from '../../lib/csv'
+import { Button, PageHeader } from '../../components/ui'
 
 type Event = {
   id: string
@@ -51,7 +52,6 @@ function formatTime(iso: string): string {
 
 export default function EventoDetalhe() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
@@ -199,8 +199,8 @@ export default function EventoDetalhe() {
     ])
   }
 
-  if (loading) return <div className="p-8 text-center text-stone-500">Carregando…</div>
-  if (!event) return <div className="p-8 text-center text-stone-500">Ensaio não encontrado.</div>
+  if (loading) return <div className="p-8 text-center text-abalo-muted">Carregando…</div>
+  if (!event) return <div className="p-8 text-center text-abalo-muted">Ensaio não encontrado.</div>
 
   const checkinUrl = `${window.location.origin}/checkin/${event.qr_token}`
 
@@ -211,78 +211,76 @@ export default function EventoDetalhe() {
   }
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-6 print:hidden">
-        <button onClick={() => navigate('/director')} className="text-sm text-stone-500 mb-2">
-          ← Voltar
-        </button>
-        <h1 className="text-2xl font-bold">{event.name}</h1>
-        <p className="text-sm text-stone-500 mt-1">
-          {formatDateTime(event.starts_at)} → {formatDateTime(event.ends_at)}
-        </p>
-        <p className="text-xs text-stone-500 mt-1">
-          Raio: {event.radius_meters}m · {event.latitude.toFixed(5)}, {event.longitude.toFixed(5)}
-        </p>
-      </header>
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
+      <div className="print:hidden">
+        <PageHeader
+          backTo="/director"
+          title={event.name}
+          subtitle={
+            <>
+              {formatDateTime(event.starts_at)} → {formatDateTime(event.ends_at)}
+              <br />
+              Raio: {event.radius_meters}m · {event.latitude.toFixed(5)}, {event.longitude.toFixed(5)}
+            </>
+          }
+        />
+      </div>
 
-      <div className="bg-white border border-stone-200 rounded-xl p-6 flex flex-col items-center print:border-0 print:p-0">
+      <div className="bg-white border-2 border-abalo-ink rounded-[10px] p-6 flex flex-col items-center print:border-0 print:p-0">
         <h2 className="hidden print:block text-2xl font-bold mb-4 text-center">{event.name}</h2>
         <QRDisplay value={checkinUrl} size={320} />
-        <p className="text-xs text-stone-400 mt-4 break-all text-center max-w-[280px] print:hidden">
+        <p className="text-xs text-abalo-muted mt-4 break-all text-center max-w-[280px] print:hidden">
           {checkinUrl}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 mt-4 print:hidden">
-        <button
-          onClick={handleCopy}
-          className="py-2 rounded-md border border-stone-300 bg-white text-sm font-medium hover:bg-stone-50"
-        >
-          {copied ? 'Copiado!' : 'Copiar link'}
-        </button>
-        <button
-          onClick={() => window.print()}
-          className="py-2 rounded-md bg-abalo-600 text-white text-sm font-medium hover:bg-abalo-700"
-        >
-          Imprimir QR
-        </button>
+        <Button variant="secondary" onClick={handleCopy} className="text-[11px]">
+          {copied ? 'COPIADO!' : 'COPIAR LINK'}
+        </Button>
+        <Button variant="primary" onClick={() => window.print()} className="text-[11px]">
+          IMPRIMIR QR
+        </Button>
       </div>
 
       <section className="mt-8 print:hidden">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-sm font-semibold text-stone-700">
-            Presenças <span className="text-stone-400 font-normal">· {present.length} de {members.length}</span>
+          <h2 className="font-display text-xs tracking-wide text-abalo-ink">
+            PRESENÇAS{' '}
+            <span className="text-abalo-muted font-sans font-normal normal-case">
+              · {present.length} de {members.length}
+            </span>
           </h2>
           <button
             onClick={handleExportXlsx}
-            className="text-xs px-3 py-1.5 rounded-md border border-stone-300 bg-white hover:bg-stone-50 font-medium"
+            className="text-[11px] font-bold px-3 py-1.5 rounded-md border-2 border-abalo-ink bg-white hover:bg-abalo-paper"
           >
-            Exportar planilha
+            EXPORTAR
           </button>
         </div>
 
-        <div className="flex gap-1 mb-3 bg-stone-100 p-1 rounded-lg">
+        <div className="flex gap-1 mb-3 bg-white border-2 border-abalo-ink p-1 rounded-md">
           <button
             onClick={() => setTab('present')}
-            className={`flex-1 py-1.5 text-sm rounded-md font-medium ${
-              tab === 'present' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500'
+            className={`flex-1 py-1.5 text-xs font-bold rounded-sm ${
+              tab === 'present' ? 'bg-abalo-ink text-abalo-amber' : 'text-abalo-muted'
             }`}
           >
-            Presentes ({present.length})
+            PRESENTES ({present.length})
           </button>
           <button
             onClick={() => setTab('absent')}
-            className={`flex-1 py-1.5 text-sm rounded-md font-medium ${
-              tab === 'absent' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500'
+            className={`flex-1 py-1.5 text-xs font-bold rounded-sm ${
+              tab === 'absent' ? 'bg-abalo-ink text-abalo-amber' : 'text-abalo-muted'
             }`}
           >
-            Faltantes ({absent.length})
+            FALTANTES ({absent.length})
           </button>
         </div>
 
-        {tab === 'present' && (
-          present.length === 0 ? (
-            <p className="text-sm text-stone-500 text-center py-6">
+        {tab === 'present' &&
+          (present.length === 0 ? (
+            <p className="text-sm text-abalo-muted text-center py-6">
               Ninguém marcou presença ainda.
             </p>
           ) : (
@@ -290,28 +288,25 @@ export default function EventoDetalhe() {
               {present.map((p) => (
                 <li
                   key={p.id}
-                  className="flex justify-between items-center px-3 py-2 rounded-md bg-white border border-stone-200"
+                  className="flex justify-between items-center px-3 py-2 rounded-md bg-white border-2 border-abalo-ink"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{p.member.full_name}</p>
+                    <p className="text-sm font-bold truncate">{p.member.full_name}</p>
                     {p.source === 'manual' && (
-                      <p className="text-xs text-amber-600">marcado manualmente</p>
+                      <p className="text-xs text-abalo-amber font-semibold">marcado manualmente</p>
                     )}
                   </div>
-                  <p className="text-xs text-stone-500 whitespace-nowrap ml-2">
+                  <p className="text-xs text-abalo-muted whitespace-nowrap ml-2">
                     {formatTime(p.checked_in_at)}
                   </p>
                 </li>
               ))}
             </ul>
-          )
-        )}
+          ))}
 
-        {tab === 'absent' && (
-          absent.length === 0 ? (
-            <p className="text-sm text-stone-500 text-center py-6">
-              Todos presentes! 🎉
-            </p>
+        {tab === 'absent' &&
+          (absent.length === 0 ? (
+            <p className="text-sm text-abalo-muted text-center py-6">Todos presentes!</p>
           ) : (
             <ul className="space-y-1">
               {absent.map((m) => {
@@ -319,22 +314,21 @@ export default function EventoDetalhe() {
                 return (
                   <li
                     key={m.id}
-                    className="flex justify-between items-center gap-2 px-3 py-2 rounded-md bg-stone-50 border border-stone-200"
+                    className="flex justify-between items-center gap-2 px-3 py-2 rounded-md bg-white/60 border-2 border-abalo-ink/30"
                   >
-                    <p className="text-sm text-stone-700 truncate">{m.full_name}</p>
+                    <p className="text-sm text-abalo-ink truncate">{m.full_name}</p>
                     <button
                       onClick={() => handleMarkManual(m.id)}
                       disabled={marking}
-                      className="text-xs px-2 py-1 rounded border border-abalo-300 text-abalo-700 hover:bg-abalo-50 shrink-0 disabled:opacity-50"
+                      className="text-[11px] font-bold px-2 py-1 rounded border-2 border-abalo-ink text-abalo-ink hover:bg-abalo-paper shrink-0 disabled:opacity-50"
                     >
-                      {marking ? '…' : 'Marcar'}
+                      {marking ? '…' : 'MARCAR'}
                     </button>
                   </li>
                 )
               })}
             </ul>
-          )
-        )}
+          ))}
       </section>
     </div>
   )

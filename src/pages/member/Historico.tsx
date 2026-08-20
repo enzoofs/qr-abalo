@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
+import { PageHeader, StatTile, Chip, type ChipTone } from '../../components/ui'
 
 type Event = {
   id: string
@@ -39,13 +39,11 @@ function formatTime(iso: string): string {
   })
 }
 
-const MIN_PRESENCAS = 5
-
-const STATUS_META: Record<Row['status'], { label: string; color: string }> = {
-  present: { label: 'Presente', color: 'bg-green-100 text-green-700' },
-  absent: { label: 'Falta', color: 'bg-red-100 text-red-700' },
-  live: { label: 'Em andamento', color: 'bg-amber-100 text-amber-700' },
-  future: { label: 'Futuro', color: 'bg-stone-100 text-stone-500' },
+const STATUS_META: Record<Row['status'], { label: string; tone: ChipTone }> = {
+  present: { label: 'Presente', tone: 'ok' },
+  absent: { label: 'Falta', tone: 'danger' },
+  live: { label: 'Em andamento', tone: 'warn' },
+  future: { label: 'Futuro', tone: 'muted' },
 }
 
 export default function MemberHistorico() {
@@ -104,44 +102,19 @@ export default function MemberHistorico() {
   }, [events, attendances])
 
   return (
-    <div className="min-h-full p-6 max-w-md mx-auto">
-      <header className="mb-6">
-        <Link to="/member" className="text-sm text-stone-500">
-          ← Voltar
-        </Link>
-        <h1 className="text-xl font-bold mt-2">Meu histórico</h1>
-      </header>
+    <div className="min-h-full bg-abalo-paper p-6 max-w-md mx-auto">
+      <PageHeader backTo="/member" title="Meu histórico" />
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <Stat label="Presenças" value={stats.presentCount} />
-        <Stat label="Ensaios" value={stats.total} />
-        <Stat
-          label="% presença"
-          value={stats.percent === null ? '—' : `${stats.percent}%`}
-        />
-      </div>
-
-      <div className="rounded-lg border border-stone-200 bg-white p-4 mb-6">
-        <div className="flex justify-between items-baseline mb-1">
-          <p className="text-sm font-medium text-stone-700">Mínimo de presenças</p>
-          <p className="text-sm text-stone-500">
-            {stats.presentCount}/{MIN_PRESENCAS}
-          </p>
-        </div>
-        <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full ${stats.presentCount >= MIN_PRESENCAS ? 'bg-green-500' : 'bg-abalo-500'}`}
-            style={{ width: `${Math.min(100, (stats.presentCount / MIN_PRESENCAS) * 100)}%` }}
-          />
-        </div>
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <StatTile label="Presenças" value={stats.presentCount} />
+        <StatTile label="Ensaios" value={stats.total} />
+        <StatTile label="% presença" value={stats.percent === null ? '—' : `${stats.percent}%`} />
       </div>
 
       {loading ? (
-        <p className="text-sm text-stone-500">Carregando…</p>
+        <p className="text-sm text-abalo-muted">Carregando…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-stone-500 text-center py-6">
-          Nenhum ensaio ainda.
-        </p>
+        <p className="text-sm text-abalo-muted text-center py-6">Nenhum ensaio ainda.</p>
       ) : (
         <ul className="space-y-2">
           {rows.map((row) => {
@@ -149,34 +122,21 @@ export default function MemberHistorico() {
             return (
               <li
                 key={row.event.id}
-                className="flex justify-between items-start gap-2 p-3 rounded-lg bg-white border border-stone-200"
+                className="flex justify-between items-start gap-2 p-3 rounded-md bg-white border-2 border-abalo-ink"
               >
                 <div className="min-w-0">
-                  <p className="font-medium text-stone-900 truncate">{row.event.name}</p>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="font-bold text-abalo-ink truncate">{row.event.name}</p>
+                  <p className="text-xs text-abalo-muted mt-0.5">
                     {formatDateTime(row.event.starts_at)}
                     {row.status === 'present' && ' · marcou às ' + formatTime(row.checked_in_at)}
                   </p>
                 </div>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${meta.color}`}
-                >
-                  {meta.label}
-                </span>
+                <Chip tone={meta.tone}>{meta.label}</Chip>
               </li>
             )
           })}
         </ul>
       )}
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-white border border-stone-200 rounded-lg px-3 py-2 text-center">
-      <p className="text-xl font-bold text-stone-900">{value}</p>
-      <p className="text-[10px] text-stone-500 uppercase tracking-wide">{label}</p>
     </div>
   )
 }

@@ -7,8 +7,8 @@ html, body, #root {
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: #fafaf9;
-  color: #1c1917;
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  background-color: #fdf3e7;
+  color: #161616;
   margin: 0;
 }
