@@ -52,7 +52,7 @@ export default function Scanner() {
       scannerRef.current = qr
       await qr.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 260, height: 260 } },
+        { fps: 10 },
         (decoded) => {
           if (navigatedRef.current) return
           const token = extractToken(decoded)
@@ -103,19 +103,22 @@ export default function Scanner() {
         <div className="w-[38px]" />
       </div>
 
-      <div className="relative w-[260px] h-[260px] mx-auto mt-10">
-        {/* corner brackets */}
-        <svg width="260" height="260" className="absolute inset-0 pointer-events-none z-10">
-          <path d="M4 50 V18 a14 14 0 0 1 14 -14 H50" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
-          <path d="M210 4 H242 a14 14 0 0 1 14 14 V50" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
-          <path d="M256 210 V242 a14 14 0 0 1 -14 14 H210" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
-          <path d="M50 256 H18 a14 14 0 0 1 -14 -14 V210" stroke="#ffb703" strokeWidth="6" fill="none" strokeLinecap="square" />
-        </svg>
+      <div className="relative mx-6 mt-8 aspect-square rounded-lg overflow-hidden bg-black">
+        <div
+          id={READER_ID}
+          className="w-full h-full [&_video]:!w-full [&_video]:!h-full [&_video]:!object-cover [&_video]:!min-w-0"
+        />
 
-        <div id={READER_ID} className="w-full h-full rounded-md overflow-hidden bg-black" />
+        {/* corner brackets, drawn with CSS so they scale with the frame */}
+        <div className="absolute inset-4 pointer-events-none z-10">
+          <span className="absolute top-0 left-0 w-9 h-9 border-t-[6px] border-l-[6px] border-abalo-amber rounded-tl-xl" />
+          <span className="absolute top-0 right-0 w-9 h-9 border-t-[6px] border-r-[6px] border-abalo-amber rounded-tr-xl" />
+          <span className="absolute bottom-0 left-0 w-9 h-9 border-b-[6px] border-l-[6px] border-abalo-amber rounded-bl-xl" />
+          <span className="absolute bottom-0 right-0 w-9 h-9 border-b-[6px] border-r-[6px] border-abalo-amber rounded-br-xl" />
+        </div>
 
         {phase !== 'scanning' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-md">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
             {phase === 'starting' ? (
               <p className="text-sm font-semibold">Abrindo câmera…</p>
             ) : (
