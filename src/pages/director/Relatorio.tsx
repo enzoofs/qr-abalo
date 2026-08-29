@@ -7,6 +7,7 @@ type Member = {
   id: string
   full_name: string
   email: string
+  instrument: string | null
 }
 
 type Event = {
@@ -49,7 +50,7 @@ export default function Relatorio() {
   useEffect(() => {
     let cancelled = false
     Promise.all([
-      supabase.from('members').select('id, full_name, email').order('full_name'),
+      supabase.from('members').select('id, full_name, email, instrument').order('full_name'),
       supabase.from('events').select('id, name, starts_at, ends_at').order('starts_at'),
       supabase.from('attendances').select('member_id, event_id, source'),
     ]).then(([mRes, eRes, aRes]) => {
@@ -97,6 +98,7 @@ export default function Relatorio() {
     const header = [
       'Nome',
       'E-mail',
+      'Instrumento',
       '% Presença',
       'Presenças',
       'Total (encerrados)',
@@ -114,6 +116,7 @@ export default function Relatorio() {
       const row: (string | number)[] = [
         stat.member.full_name,
         stat.member.email,
+        stat.member.instrument ?? '',
         stat.percent === null ? '' : `${stat.percent}%`,
         stat.present,
         stat.total,
@@ -130,7 +133,7 @@ export default function Relatorio() {
       {
         name: 'Resumo',
         rows,
-        columnWidths: [28, 32, 12, 12, 18, ...events.map(() => 22)],
+        columnWidths: [28, 32, 16, 12, 12, 18, ...events.map(() => 22)],
       },
     ])
   }
@@ -179,6 +182,9 @@ export default function Relatorio() {
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-abalo-ink truncate">{s.member.full_name}</p>
+                {s.member.instrument && (
+                  <p className="text-xs text-abalo-muted truncate">{s.member.instrument}</p>
+                )}
                 <div className="flex items-center gap-2 mt-1.5">
                   <div className="flex-1 h-2 bg-abalo-paper rounded-full overflow-hidden border border-abalo-ink/20">
                     <div className="h-full bg-abalo-coral" style={{ width: `${s.percent ?? 0}%` }} />

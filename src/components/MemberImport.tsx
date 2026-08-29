@@ -6,6 +6,7 @@ type ParsedRow = {
   full_name: string
   email: string
   whatsapp: string | null
+  instrument: string | null
   valid: boolean
   error?: string
 }
@@ -65,21 +66,22 @@ function parseInput(text: string): ParsedRow[] {
     const full_name = fields[0] ?? ''
     const email = (fields[1] ?? '').toLowerCase()
     const whatsapp = fields[2] ? fields[2] : null
+    const instrument = fields[3] ? fields[3] : null
 
     if (!full_name && !email) continue
     if (!full_name) {
-      rows.push({ full_name, email, whatsapp, valid: false, error: 'Nome vazio' })
+      rows.push({ full_name, email, whatsapp, instrument, valid: false, error: 'Nome vazio' })
       continue
     }
     if (!email) {
-      rows.push({ full_name, email, whatsapp, valid: false, error: 'E-mail vazio' })
+      rows.push({ full_name, email, whatsapp, instrument, valid: false, error: 'E-mail vazio' })
       continue
     }
     if (!EMAIL_RE.test(email)) {
-      rows.push({ full_name, email, whatsapp, valid: false, error: 'E-mail inválido' })
+      rows.push({ full_name, email, whatsapp, instrument, valid: false, error: 'E-mail inválido' })
       continue
     }
-    rows.push({ full_name, email, whatsapp, valid: true })
+    rows.push({ full_name, email, whatsapp, instrument, valid: true })
   }
   return rows
 }
@@ -145,6 +147,7 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
       full_name: r.full_name,
       email: r.email,
       whatsapp: r.whatsapp,
+      instrument: r.instrument,
       role: 'member' as const,
     }))
 
@@ -170,8 +173,10 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
 
       <p className="text-xs text-abalo-muted mb-3">
         Cola ou faz upload de um CSV. Cada linha:{' '}
-        <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">nome,email,whatsapp</code>{' '}
-        (whatsapp opcional). Cabeçalho é detectado automaticamente.
+        <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">
+          nome,email,whatsapp,instrumento
+        </code>{' '}
+        (whatsapp e instrumento opcionais). Cabeçalho é detectado automaticamente.
       </p>
 
       <div className="flex gap-2 mb-3">
@@ -198,7 +203,7 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
           setResult(null)
         }}
         rows={6}
-        placeholder={'Maria Silva,maria@gmail.com,11999990001\nJoão Santos,joao@gmail.com'}
+        placeholder={'Maria Silva,maria@gmail.com,11999990001,Surdo\nJoão Santos,joao@gmail.com,,Caixa'}
         className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white focus:outline-none focus:ring-2 focus:ring-abalo-coral text-sm font-mono"
       />
 

@@ -8,6 +8,7 @@ export type Member = {
   email: string
   full_name: string
   whatsapp: string | null
+  instrument: string | null
   role: 'member' | 'director'
 }
 

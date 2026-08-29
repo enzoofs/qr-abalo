@@ -95,6 +95,14 @@ export default function App() {
             }
           />
           <Route
+            path="/director/eventos/:id/editar"
+            element={
+              <ProtectedRoute requireDirector>
+                <NovoEvento />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/director/membros"
             element={
               <ProtectedRoute requireDirector>

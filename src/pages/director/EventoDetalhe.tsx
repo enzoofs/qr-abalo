@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { QRDisplay } from '../../components/QRDisplay'
 import { downloadXlsx, slugify } from '../../lib/csv'
-import { Button, PageHeader } from '../../components/ui'
+import { Button, LinkButton, PageHeader } from '../../components/ui'
 
 type Event = {
   id: string
@@ -20,6 +20,7 @@ type Member = {
   id: string
   full_name: string
   email: string
+  instrument: string | null
 }
 
 type Attendance = {
@@ -80,7 +81,7 @@ export default function EventoDetalhe() {
 
     async function load() {
       const [membersRes, attendancesRes] = await Promise.all([
-        supabase.from('members').select('id, full_name, email').order('full_name'),
+        supabase.from('members').select('id, full_name, email, instrument').order('full_name'),
         supabase
           .from('attendances')
           .select('id, event_id, member_id, checked_in_at, distance_meters, source')
@@ -164,7 +165,7 @@ export default function EventoDetalhe() {
   async function handleExportXlsx() {
     if (!event) return
     const rows: (string | number)[][] = [
-      ['Nome', 'E-mail', 'Status', 'Horário', 'Origem', 'Distância (m)'],
+      ['Nome', 'E-mail', 'Instrumento', 'Status', 'Horário', 'Origem', 'Distância (m)'],
     ]
     const sorted = [...members].sort((a, b) => a.full_name.localeCompare(b.full_name, 'pt-BR'))
     for (const m of sorted) {
@@ -173,6 +174,7 @@ export default function EventoDetalhe() {
         rows.push([
           m.full_name,
           m.email,
+          m.instrument ?? '',
           'Presente',
           new Date(att.checked_in_at).toLocaleString('pt-BR', {
             day: '2-digit',
@@ -186,7 +188,7 @@ export default function EventoDetalhe() {
           att.distance_meters ?? '',
         ])
       } else {
-        rows.push([m.full_name, m.email, 'Falta', '', '', ''])
+        rows.push([m.full_name, m.email, m.instrument ?? '', 'Falta', '', '', ''])
       }
     }
     const date = event.starts_at.slice(0, 10)
@@ -194,7 +196,7 @@ export default function EventoDetalhe() {
       {
         name: 'Presenças',
         rows,
-        columnWidths: [28, 32, 12, 18, 10, 14],
+        columnWidths: [28, 32, 16, 12, 18, 10, 14],
       },
     ])
   }
@@ -222,6 +224,11 @@ export default function EventoDetalhe() {
               <br />
               Raio: {event.radius_meters}m · {event.latitude.toFixed(5)}, {event.longitude.toFixed(5)}
             </>
+          }
+          action={
+            <LinkButton to={`/director/eventos/${event.id}/editar`} variant="secondary" className="text-[11px] shrink-0">
+              EDITAR
+            </LinkButton>
           }
         />
       </div>
@@ -292,6 +299,9 @@ export default function EventoDetalhe() {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-bold truncate">{p.member.full_name}</p>
+                    {p.member.instrument && (
+                      <p className="text-xs text-abalo-muted">{p.member.instrument}</p>
+                    )}
                     {p.source === 'manual' && (
                       <p className="text-xs text-abalo-amber font-semibold">marcado manualmente</p>
                     )}
@@ -316,7 +326,10 @@ export default function EventoDetalhe() {
                     key={m.id}
                     className="flex justify-between items-center gap-2 px-3 py-2 rounded-md bg-white/60 border-2 border-abalo-ink/30"
                   >
-                    <p className="text-sm text-abalo-ink truncate">{m.full_name}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm text-abalo-ink truncate">{m.full_name}</p>
+                      {m.instrument && <p className="text-xs text-abalo-muted">{m.instrument}</p>}
+                    </div>
                     <button
                       onClick={() => handleMarkManual(m.id)}
                       disabled={marking}

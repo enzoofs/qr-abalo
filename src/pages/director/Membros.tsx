@@ -8,6 +8,7 @@ type Member = {
   email: string
   full_name: string
   whatsapp: string | null
+  instrument: string | null
   role: 'member' | 'director'
 }
 
@@ -24,7 +25,7 @@ export default function Membros() {
     setLoading(true)
     const { data, error } = await supabase
       .from('members')
-      .select('id, email, full_name, whatsapp, role')
+      .select('id, email, full_name, whatsapp, instrument, role')
       .order('full_name')
     if (error) console.error(error)
     setMembers((data ?? []) as Member[])
@@ -39,7 +40,10 @@ export default function Membros() {
     const q = search.trim().toLowerCase()
     if (!q) return members
     return members.filter(
-      (m) => m.full_name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q),
+      (m) =>
+        m.full_name.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q) ||
+        (m.instrument ?? '').toLowerCase().includes(q),
     )
   }, [members, search])
 
@@ -66,7 +70,7 @@ export default function Membros() {
       <div className="flex gap-2 mb-2">
         <Input
           type="search"
-          placeholder="Buscar por nome ou e-mail"
+          placeholder="Buscar por nome, e-mail ou instrumento"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -139,7 +143,10 @@ export default function Membros() {
             >
               <div className="min-w-0">
                 <p className="text-sm font-bold text-abalo-ink truncate">{m.full_name}</p>
-                <p className="text-xs text-abalo-muted truncate">{m.email}</p>
+                <p className="text-xs text-abalo-muted truncate">
+                  {m.email}
+                  {m.instrument && ` · ${m.instrument}`}
+                </p>
                 {m.role === 'director' && (
                   <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-abalo-amber text-abalo-ink mt-1 uppercase tracking-wide">
                     diretor
@@ -183,6 +190,7 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
   const [fullName, setFullName] = useState(initial?.full_name ?? '')
   const [email, setEmail] = useState(initial?.email ?? '')
   const [whatsapp, setWhatsapp] = useState(initial?.whatsapp ?? '')
+  const [instrument, setInstrument] = useState(initial?.instrument ?? '')
   const [role, setRole] = useState<Member['role']>(initial?.role ?? 'member')
   const [busy, setBusy] = useState(false)
 
@@ -194,6 +202,7 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
       full_name: fullName.trim(),
       email: email.trim().toLowerCase(),
       whatsapp: whatsapp.trim() || null,
+      instrument: instrument.trim() || null,
       role,
     }
     const res = initial
@@ -234,6 +243,12 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
         placeholder="WhatsApp (opcional)"
         value={whatsapp}
         onChange={(e) => setWhatsapp(e.target.value)}
+      />
+      <Input
+        type="text"
+        placeholder="Instrumento (opcional)"
+        value={instrument}
+        onChange={(e) => setInstrument(e.target.value)}
       />
       <select
         value={role}
