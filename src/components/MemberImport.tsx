@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { supabase } from '../lib/supabase'
+import { downloadCsv, toCsv } from '../lib/csv'
 import { Button } from './ui'
 
 type ParsedRow = {
@@ -109,6 +110,16 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
     return Array.from(map.values())
   }, [valid])
 
+  function handleDownloadTemplate() {
+    const csv = toCsv([
+      ['Nome', 'Email', 'WhatsApp', 'Instrumento'],
+      ['Maria Silva', 'maria@gmail.com', '11999990001', 'Surdo de Primeira'],
+      ['João Santos', 'joao@gmail.com', '', 'Caixa'],
+      ['Ana Pereira', 'ana@gmail.com', '31988887777', ''],
+    ])
+    downloadCsv('modelo-cadastro-membros.csv', csv)
+  }
+
   function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -176,11 +187,13 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
         <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">
           nome,email,whatsapp,instrumento
         </code>{' '}
-        (whatsapp e instrumento opcionais). Cabeçalho é detectado automaticamente.
+        (whatsapp e instrumento opcionais). Cabeçalho é detectado automaticamente. Sem certeza do
+        formato? Baixa o modelo abaixo e preenche em cima dele.
       </p>
       <p className="text-xs text-abalo-muted mb-3">
-        Planilha feita no Excel? Não dá pra subir o <code>.xlsx</code> direto — salva como CSV
-        (Arquivo → Salvar como → CSV) ou seleciona as células, copia e cola aqui em cima.
+        Preencheu num Excel seu (não é o modelo baixado aqui)? Não dá pra subir o <code>.xlsx</code>{' '}
+        direto — salva como CSV (Arquivo → Salvar como → CSV) ou seleciona as células, copia e
+        cola aqui em cima.
       </p>
 
       <div className="flex gap-2 mb-3">
@@ -190,6 +203,13 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
           className="text-xs font-bold px-3 py-1.5 rounded-md border-2 border-abalo-ink bg-white hover:bg-abalo-paper"
         >
           CARREGAR ARQUIVO CSV
+        </button>
+        <button
+          type="button"
+          onClick={handleDownloadTemplate}
+          className="text-xs font-bold px-3 py-1.5 rounded-md border-2 border-abalo-ink bg-white hover:bg-abalo-paper"
+        >
+          BAIXAR MODELO
         </button>
         <input
           ref={fileInputRef}
@@ -207,7 +227,9 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
           setResult(null)
         }}
         rows={6}
-        placeholder={'Maria Silva,maria@gmail.com,11999990001,Surdo\nJoão Santos,joao@gmail.com,,Caixa'}
+        placeholder={
+          'Maria Silva,maria@gmail.com,11999990001,Surdo de Primeira\nJoão Santos,joao@gmail.com,,Caixa'
+        }
         className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white focus:outline-none focus:ring-2 focus:ring-abalo-coral text-sm font-mono"
       />
 

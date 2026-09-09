@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { supabase } from '../../lib/supabase'
 import { MemberImport } from '../../components/MemberImport'
 import { Button, Input, PageHeader } from '../../components/ui'
+import { INSTRUMENTS } from '../../lib/instruments'
 
 type Member = {
   id: string
@@ -244,12 +245,18 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
         value={whatsapp}
         onChange={(e) => setWhatsapp(e.target.value)}
       />
-      <Input
-        type="text"
-        placeholder="Instrumento (opcional)"
+      <select
         value={instrument}
         onChange={(e) => setInstrument(e.target.value)}
-      />
+        className="w-full px-3 py-2.5 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+      >
+        <option value="">Instrumento (opcional)</option>
+        {INSTRUMENTS.map((i) => (
+          <option key={i} value={i}>
+            {i}
+          </option>
+        ))}
+      </select>
       <select
         value={role}
         onChange={(e) => setRole(e.target.value as Member['role'])}
