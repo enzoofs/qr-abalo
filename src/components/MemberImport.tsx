@@ -171,12 +171,16 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
         </button>
       </div>
 
-      <p className="text-xs text-abalo-muted mb-3">
+      <p className="text-xs text-abalo-muted mb-2">
         Cola ou faz upload de um CSV. Cada linha:{' '}
         <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">
           nome,email,whatsapp,instrumento
         </code>{' '}
         (whatsapp e instrumento opcionais). Cabeçalho é detectado automaticamente.
+      </p>
+      <p className="text-xs text-abalo-muted mb-3">
+        Planilha feita no Excel? Não dá pra subir o <code>.xlsx</code> direto — salva como CSV
+        (Arquivo → Salvar como → CSV) ou seleciona as células, copia e cola aqui em cima.
       </p>
 
       <div className="flex gap-2 mb-3">
