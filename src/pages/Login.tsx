@@ -89,9 +89,10 @@ export default function Login() {
 
           {mode === 'signin' ? (
             <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
-              Cadastrado pela diretoria? Seu login é o seu <strong>e-mail</strong> e a senha são os{' '}
-              <strong>4 últimos dígitos do seu WhatsApp</strong>. Dá pra trocar a senha depois de
-              entrar.
+              Seu acesso é criado automaticamente quando a diretoria te cadastra — não precisa criar
+              conta. O <strong>login é o seu e-mail</strong> e a <strong>senha são os 4 últimos
+              dígitos do seu WhatsApp</strong>. Depois de entrar, dá pra trocar a senha quando quiser
+              em "Trocar senha".
             </p>
           ) : (
             <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
