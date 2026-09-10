@@ -85,17 +85,22 @@ export default function MemberHome() {
               Oi, {member?.full_name.split(' ')[0]}
             </h1>
           </div>
-          <button
-            onClick={signOut}
-            className="w-10 h-10 rounded-full border-[2.5px] border-abalo-ink bg-white flex items-center justify-center"
-            aria-label="Sair"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <button
+              onClick={signOut}
+              className="w-10 h-10 rounded-full border-[2.5px] border-abalo-ink bg-white flex items-center justify-center"
+              aria-label="Sair"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+            <Link to="/trocar-senha" className="text-[11px] font-bold text-abalo-blue">
+              Trocar senha
+            </Link>
+          </div>
         </header>
 
         {loading ? (

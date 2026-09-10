@@ -95,9 +95,14 @@ export default function DirectorEventos() {
           </div>
           <h1 className="text-xl font-extrabold">{member?.full_name}</h1>
         </div>
-        <button onClick={signOut} className="text-xs font-bold text-abalo-muted">
-          SAIR
-        </button>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <button onClick={signOut} className="text-xs font-bold text-abalo-muted">
+            SAIR
+          </button>
+          <Link to="/trocar-senha" className="text-[11px] font-bold text-abalo-blue">
+            Trocar senha
+          </Link>
+        </div>
       </header>
 
       <LinkButton to="/director/novo" variant="primary" className="w-full py-3 mb-3">

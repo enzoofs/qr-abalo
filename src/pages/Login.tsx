@@ -87,7 +87,13 @@ export default function Login() {
             </button>
           </div>
 
-          {mode === 'signup' && (
+          {mode === 'signin' ? (
+            <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
+              Cadastrado pela diretoria? Seu login é o seu <strong>e-mail</strong> e a senha são os{' '}
+              <strong>4 últimos dígitos do seu WhatsApp</strong>. Dá pra trocar a senha depois de
+              entrar.
+            </p>
+          ) : (
             <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
               <strong>Atenção:</strong> use o mesmo e-mail que você informou no formulário de
               inscrição da bateria. Esse vai ser seu e-mail de login pra sempre.
@@ -115,11 +121,11 @@ export default function Login() {
               </label>
               <input
                 type="password"
-                placeholder="mín. 6 caracteres"
+                placeholder={mode === 'signin' ? '4 últimos dígitos do WhatsApp' : 'mín. 6 caracteres'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={mode === 'signin' ? undefined : 6}
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
               />

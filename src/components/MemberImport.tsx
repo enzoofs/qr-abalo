@@ -187,8 +187,12 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
         <code className="bg-abalo-paper px-1 rounded border border-abalo-ink/20">
           nome,email,whatsapp,instrumento
         </code>{' '}
-        (whatsapp e instrumento opcionais). Cabeçalho é detectado automaticamente. Sem certeza do
-        formato? Baixa o modelo abaixo e preenche em cima dele.
+        (instrumento opcional). Cabeçalho é detectado automaticamente. Sem certeza do formato? Baixa
+        o modelo abaixo e preenche em cima dele.
+      </p>
+      <p className="text-xs text-abalo-muted mb-2">
+        O login de cada membro é criado na hora: e-mail + os 4 últimos dígitos do WhatsApp como
+        senha. Quem não tiver WhatsApp entra pelo "Criar conta".
       </p>
       <p className="text-xs text-abalo-muted mb-3">
         Preencheu num Excel seu (não é o modelo baixado aqui)? Não dá pra subir o <code>.xlsx</code>{' '}

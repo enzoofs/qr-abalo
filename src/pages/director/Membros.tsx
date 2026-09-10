@@ -10,6 +10,7 @@ type Member = {
   full_name: string
   whatsapp: string | null
   instrument: string | null
+  auth_user_id: string | null
   role: 'member' | 'director'
 }
 
@@ -26,7 +27,7 @@ export default function Membros() {
     setLoading(true)
     const { data, error } = await supabase
       .from('members')
-      .select('id, email, full_name, whatsapp, instrument, role')
+      .select('id, email, full_name, whatsapp, instrument, auth_user_id, role')
       .order('full_name')
     if (error) console.error(error)
     setMembers((data ?? []) as Member[])
@@ -148,11 +149,18 @@ export default function Membros() {
                   {m.email}
                   {m.instrument && ` · ${m.instrument}`}
                 </p>
-                {m.role === 'director' && (
-                  <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-abalo-amber text-abalo-ink mt-1 uppercase tracking-wide">
-                    diretor
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {m.role === 'director' && (
+                    <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-abalo-amber text-abalo-ink uppercase tracking-wide">
+                      diretor
+                    </span>
+                  )}
+                  {!m.auth_user_id && (
+                    <span className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-abalo-red text-white uppercase tracking-wide">
+                      sem login
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-1 shrink-0">
                 <button
@@ -239,12 +247,18 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
         onChange={(e) => setEmail(e.target.value)}
         required
       />
-      <Input
-        type="tel"
-        placeholder="WhatsApp (opcional)"
-        value={whatsapp}
-        onChange={(e) => setWhatsapp(e.target.value)}
-      />
+      <div>
+        <Input
+          type="tel"
+          placeholder="WhatsApp"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+        />
+        <p className="text-xs text-abalo-muted mt-1">
+          Usado pra criar o login do membro: os 4 últimos dígitos viram a senha inicial. Sem
+          WhatsApp, o membro precisa usar "Criar conta" no app.
+        </p>
+      </div>
       <select
         value={instrument}
         onChange={(e) => setInstrument(e.target.value)}

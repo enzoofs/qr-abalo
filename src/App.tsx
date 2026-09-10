@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './lib/auth'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Login from './pages/Login'
 import NotWhitelisted from './pages/NotWhitelisted'
+import TrocarSenha from './pages/TrocarSenha'
 import Checkin from './pages/Checkin'
 import MemberHome from './pages/member/Home'
 import MemberScanner from './pages/member/Scanner'
@@ -32,6 +33,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <RoleRedirect />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/trocar-senha"
+            element={
+              <ProtectedRoute>
+                <TrocarSenha />
               </ProtectedRoute>
             }
           />
