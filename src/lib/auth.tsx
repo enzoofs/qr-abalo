@@ -114,6 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!whitelisted) {
       return { error: 'Esse e-mail não está cadastrado pela direção do bloco.' }
     }
+    const { data: hasLogin, error: hasLoginError } = await supabase.rpc('member_has_login', {
+      p_email: email,
+    })
+    if (!hasLoginError && hasLogin) {
+      return {
+        error:
+          'Esse e-mail já tem acesso criado pela diretoria. Clique em "Entrar" e use os 4 últimos dígitos do seu WhatsApp como senha.',
+      }
+    }
     const { error } = await supabase.auth.signUp({ email, password })
     return { error: error?.message }
   }

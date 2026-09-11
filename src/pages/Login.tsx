@@ -126,7 +126,6 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={mode === 'signin' ? undefined : 6}
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
               />
