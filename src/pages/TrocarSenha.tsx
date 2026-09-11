@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Button, Input, PageHeader } from '../components/ui'
+import { friendlyAuthError } from '../lib/errors'
 
 export default function TrocarSenha() {
   const navigate = useNavigate()
@@ -30,7 +31,7 @@ export default function TrocarSenha() {
     }
     setBusy(false)
     if (err) {
-      setError(err.message)
+      setError(friendlyAuthError(err.message))
       return
     }
     setDone(true)

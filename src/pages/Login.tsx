@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { supabase } from '../lib/supabase'
+import { friendlyAuthError } from '../lib/errors'
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/'
@@ -11,26 +13,75 @@ function safeNext(raw: string | null): string {
 const FLAG_COLORS = ['bg-abalo-red', 'bg-abalo-amber', 'bg-abalo-green', 'bg-abalo-blue', 'bg-abalo-purple']
 
 export default function Login() {
-  const { session, signInWithEmail, signUpWithEmail } = useAuth()
+  const { session, signInWithEmail } = useAuth()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const next = safeNext(searchParams.get('next'))
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'signin' | 'changepw'>('signin')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  if (session) return <Navigate to={next} replace />
+  // entrar
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
-  async function handleEmail(e: FormEvent) {
+  // trocar senha
+  const [cpEmail, setCpEmail] = useState('')
+  const [cpCurrent, setCpCurrent] = useState('')
+  const [cpNew, setCpNew] = useState('')
+  const [cpConfirm, setCpConfirm] = useState('')
+  const [suppressRedirect, setSuppressRedirect] = useState(false)
+
+  if (session && !suppressRedirect) return <Navigate to={next} replace />
+
+  function switchMode(next: 'signin' | 'changepw') {
+    setMode(next)
+    setError(null)
+  }
+
+  async function handleSignin(e: FormEvent) {
     e.preventDefault()
     setError(null)
     setBusy(true)
-    const fn = mode === 'signin' ? signInWithEmail : signUpWithEmail
-    const { error: err } = await fn(email, password)
+    const { error: err } = await signInWithEmail(email, password)
     setBusy(false)
-    if (err) setError(err)
+    if (err) setError(friendlyAuthError(err))
+  }
+
+  async function handleChangePassword(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (cpNew.length < 6) {
+      setError('A senha nova precisa ter pelo menos 6 caracteres.')
+      return
+    }
+    if (cpNew !== cpConfirm) {
+      setError('As senhas novas não são iguais.')
+      return
+    }
+    setBusy(true)
+    setSuppressRedirect(true)
+
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: cpEmail,
+      password: cpCurrent,
+    })
+    if (signInErr) {
+      setBusy(false)
+      setSuppressRedirect(false)
+      setError(friendlyAuthError(signInErr.message))
+      return
+    }
+
+    const { error: updateErr } = await supabase.auth.updateUser({ password: cpNew })
+    setBusy(false)
+    if (updateErr) {
+      setError(friendlyAuthError(updateErr.message))
+      return
+    }
+    await supabase.rpc('mark_password_changed')
+    navigate(next, { replace: true })
   }
 
   return (
@@ -59,14 +110,20 @@ export default function Login() {
           ))}
         </div>
 
-        <div className="w-full max-w-sm mt-9 bg-abalo-paper border-[3px] border-abalo-ink rounded-lg shadow-hard-lg p-6">
+        {/* aviso sobre a senha padrão, sempre visível */}
+        <div className="w-full max-w-sm mt-6 bg-abalo-ink border-2 border-abalo-ink rounded-md p-3.5">
+          <p className="text-xs text-abalo-paper text-center leading-relaxed">
+            Sua conta já existe! Faça login com seu <strong className="text-abalo-amber">e-mail</strong>{' '}
+            e os <strong className="text-abalo-amber">6 últimos dígitos do seu celular</strong> como
+            senha.
+          </p>
+        </div>
+
+        <div className="w-full max-w-sm mt-4 bg-abalo-paper border-[3px] border-abalo-ink rounded-lg shadow-hard-lg p-6">
           <div className="flex gap-2 mb-5">
             <button
               type="button"
-              onClick={() => {
-                setMode('signin')
-                setError(null)
-              }}
+              onClick={() => switchMode('signin')}
               className={`flex-1 py-2 rounded-md border-2 border-abalo-ink font-display text-[11px] tracking-wider ${
                 mode === 'signin' ? 'bg-abalo-ink text-abalo-amber' : 'bg-white text-abalo-ink'
               }`}
@@ -75,76 +132,132 @@ export default function Login() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setMode('signup')
-                setError(null)
-              }}
+              onClick={() => switchMode('changepw')}
               className={`flex-1 py-2 rounded-md border-2 border-abalo-ink font-display text-[11px] tracking-wider ${
-                mode === 'signup' ? 'bg-abalo-ink text-abalo-amber' : 'bg-white text-abalo-ink'
+                mode === 'changepw' ? 'bg-abalo-ink text-abalo-amber' : 'bg-white text-abalo-ink'
               }`}
             >
-              CRIAR CONTA
+              TROCAR SENHA
             </button>
           </div>
 
           {mode === 'signin' ? (
-            <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
-              Seu acesso é criado automaticamente quando a diretoria te cadastra — não precisa criar
-              conta. O <strong>login é o seu e-mail</strong> e a <strong>senha são os 6 últimos
-              dígitos do seu WhatsApp</strong>. Depois de entrar, dá pra trocar a senha quando quiser
-              em "Trocar senha".
-            </p>
+            <form onSubmit={handleSignin} className="space-y-4">
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  E-MAIL
+                </label>
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  SENHA
+                </label>
+                <input
+                  type="password"
+                  placeholder="6 últimos dígitos do celular"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              {error && <p className="text-sm font-semibold text-abalo-red">{error}</p>}
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full py-3.5 rounded-md border-[2.5px] border-abalo-ink bg-abalo-coral text-abalo-paper font-display text-sm tracking-wide shadow-hard disabled:opacity-50"
+              >
+                {busy ? '...' : 'ENTRAR'}
+              </button>
+            </form>
           ) : (
-            <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3 mb-4">
-              <strong>Atenção:</strong> use o mesmo e-mail que você informou no formulário de
-              inscrição da bateria. Esse vai ser seu e-mail de login pra sempre.
-            </p>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <p className="text-xs text-abalo-ink bg-white border-2 border-abalo-ink rounded-md p-3">
+                Informe seu e-mail, sua senha atual (os 6 últimos dígitos do celular, se ainda não
+                trocou) e a senha nova.
+              </p>
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  E-MAIL
+                </label>
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={cpEmail}
+                  onChange={(e) => setCpEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  SENHA ATUAL
+                </label>
+                <input
+                  type="password"
+                  placeholder="6 últimos dígitos do celular"
+                  value={cpCurrent}
+                  onChange={(e) => setCpCurrent(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  SENHA NOVA
+                </label>
+                <input
+                  type="password"
+                  placeholder="mín. 6 caracteres"
+                  value={cpNew}
+                  onChange={(e) => setCpNew(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              <div>
+                <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
+                  CONFIRMAR SENHA NOVA
+                </label>
+                <input
+                  type="password"
+                  placeholder="mín. 6 caracteres"
+                  value={cpConfirm}
+                  onChange={(e) => setCpConfirm(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
+                />
+              </div>
+              {error && <p className="text-sm font-semibold text-abalo-red">{error}</p>}
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full py-3.5 rounded-md border-[2.5px] border-abalo-ink bg-abalo-coral text-abalo-paper font-display text-sm tracking-wide shadow-hard disabled:opacity-50"
+              >
+                {busy ? '...' : 'TROCAR SENHA'}
+              </button>
+            </form>
           )}
-
-          <form onSubmit={handleEmail} className="space-y-4">
-            <div>
-              <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
-                E-MAIL
-              </label>
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
-              />
-            </div>
-            <div>
-              <label className="block font-display text-[11px] tracking-wider text-abalo-ink mb-2">
-                SENHA
-              </label>
-              <input
-                type="password"
-                placeholder={mode === 'signin' ? '6 últimos dígitos do WhatsApp' : 'mín. 6 caracteres'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                className="w-full px-3 py-3 rounded-md border-2 border-abalo-ink bg-white text-sm focus:outline-none focus:ring-2 focus:ring-abalo-coral"
-              />
-            </div>
-            {error && <p className="text-sm font-semibold text-abalo-red">{error}</p>}
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full py-3.5 rounded-md border-[2.5px] border-abalo-ink bg-abalo-coral text-abalo-paper font-display text-sm tracking-wide shadow-hard disabled:opacity-50"
-            >
-              {busy ? '...' : mode === 'signin' ? 'ENTRAR' : 'CRIAR CONTA'}
-            </button>
-          </form>
         </div>
 
         <p className="relative text-center text-[13px] font-semibold text-abalo-ink mt-5 px-10 leading-relaxed">
           Acesso liberado pela diretoria do bloco.
           <br />
-          Fale com a diretoria se ainda não tem conta.
+          Fale com a diretoria se ainda não conseguir entrar.
         </p>
       </div>
     </div>
