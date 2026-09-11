@@ -255,7 +255,7 @@ function MemberForm({ initial, onCancel, onSaved, onError }: FormProps) {
           onChange={(e) => setWhatsapp(e.target.value)}
         />
         <p className="text-xs text-abalo-muted mt-1">
-          Usado pra criar o login do membro: os 4 últimos dígitos viram a senha inicial. Sem
+          Usado pra criar o login do membro: os 6 últimos dígitos viram a senha inicial. Sem
           WhatsApp, o membro precisa usar "Criar conta" no app.
         </p>
       </div>

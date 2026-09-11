@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!hasLoginError && hasLogin) {
       return {
         error:
-          'Esse e-mail já tem acesso criado pela diretoria. Clique em "Entrar" e use os 4 últimos dígitos do seu WhatsApp como senha.',
+          'Esse e-mail já tem acesso criado pela diretoria. Clique em "Entrar" e use os 6 últimos dígitos do seu WhatsApp como senha.',
       }
     }
     const { error } = await supabase.auth.signUp({ email, password })

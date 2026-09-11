@@ -24,6 +24,10 @@ export default function TrocarSenha() {
     }
     setBusy(true)
     const { error: err } = await supabase.auth.updateUser({ password: senha })
+    if (!err) {
+      // marca que a senha não é mais a automática, pra nenhum reset futuro sobrescrever
+      await supabase.rpc('mark_password_changed')
+    }
     setBusy(false)
     if (err) {
       setError(err.message)

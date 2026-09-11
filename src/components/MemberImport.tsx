@@ -191,7 +191,7 @@ export function MemberImport({ onImportComplete, onCancel }: Props) {
         o modelo abaixo e preenche em cima dele.
       </p>
       <p className="text-xs text-abalo-muted mb-2">
-        O login de cada membro é criado na hora: e-mail + os 4 últimos dígitos do WhatsApp como
+        O login de cada membro é criado na hora: e-mail + os 6 últimos dígitos do WhatsApp como
         senha. Quem não tiver WhatsApp entra pelo "Criar conta".
       </p>
       <p className="text-xs text-abalo-muted mb-3">
