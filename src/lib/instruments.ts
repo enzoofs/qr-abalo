@@ -5,5 +5,5 @@ export const INSTRUMENTS = [
   'Agogô',
   'Xequerê',
   'Caixa',
-  'Tamborim',
+  'Repique',
 ] as const
