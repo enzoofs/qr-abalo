@@ -144,6 +144,16 @@ export default function EventoDetalhe() {
     return { present, absent }
   }, [members, attendances])
 
+  async function handleRemovePresenca(attendanceId: string, memberName: string) {
+    if (!confirm(`Remover a presença de ${memberName} nesse ensaio? Isso não pode ser desfeito.`)) {
+      return
+    }
+    const { error } = await supabase.from('attendances').delete().eq('id', attendanceId)
+    if (error) {
+      alert('Erro ao remover: ' + error.message)
+    }
+  }
+
   async function handleMarkManual(memberId: string) {
     if (!event) return
     setMarkingIds((prev) => new Set(prev).add(memberId))
@@ -306,9 +316,17 @@ export default function EventoDetalhe() {
                       <p className="text-xs text-abalo-amber font-semibold">marcado manualmente</p>
                     )}
                   </div>
-                  <p className="text-xs text-abalo-muted whitespace-nowrap ml-2">
-                    {formatTime(p.checked_in_at)}
-                  </p>
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <p className="text-xs text-abalo-muted whitespace-nowrap">
+                      {formatTime(p.checked_in_at)}
+                    </p>
+                    <button
+                      onClick={() => handleRemovePresenca(p.id, p.member.full_name)}
+                      className="text-[11px] font-bold px-2 py-1 rounded border-2 border-abalo-red text-abalo-red hover:bg-abalo-red/10"
+                    >
+                      REMOVER
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
